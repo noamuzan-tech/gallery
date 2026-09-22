@@ -160,14 +160,14 @@ for (const e of events) {
     mime: cover.mime,
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
     ogDescription: [e.date, e.description].filter(Boolean).join(' · '),
-  });
+  }, config.instagramUrl);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);
   e.pageUrl = pageUrl;
   e.coverFile = cover.file;
 }
 
-fs.writeFileSync(path.join(DIST_DIR, 'index.html'), renderHomePage(config.siteUrl));
-fs.writeFileSync(path.join(DIST_DIR, '404.html'), renderNotFoundPage(config.siteUrl));
+fs.writeFileSync(path.join(DIST_DIR, 'index.html'), renderHomePage(config.siteUrl, config.instagramUrl));
+fs.writeFileSync(path.join(DIST_DIR, '404.html'), renderNotFoundPage(config.siteUrl, config.instagramUrl));
 fs.writeFileSync(path.join(DIST_DIR, '.nojekyll'), '');
 
 // ---------- report ----------

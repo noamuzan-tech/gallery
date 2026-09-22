@@ -34,6 +34,12 @@ img{display:block;max-width:100%}
 .rule{width:36px;height:1px;background:var(--line);border:0;margin:1.75rem auto}
 .foot{margin-top:auto;padding:2.5rem 1.5rem calc(2rem + env(safe-area-inset-bottom));text-align:center;font-size:.75rem;letter-spacing:.06em;color:var(--muted)}
 .foot p{margin:0}
+.social{display:flex;justify-content:center;gap:1rem;margin-bottom:1.1rem}
+.social a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;
+color:var(--fg);border:1px solid var(--line);transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
+.social a:hover{background:rgba(244,241,234,.08);border-color:rgba(244,241,234,.35);transform:translateY(-2px)}
+.social a:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.social svg{width:20px;height:20px}
 .up{opacity:0;animation:up .9s var(--ease) forwards}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}}
@@ -94,7 +100,14 @@ const HOME_CSS = `
 `;
 
 const BRAND = `<p class="brand" lang="en" dir="ltr"><span class="brand-name">NOAM UZAN</span><span class="brand-sub">PHOTOGRAPHY</span></p>`;
-const FOOTER = `<footer class="foot"><p lang="en" dir="ltr">&copy; Noam Uzan Photography</p></footer>`;
+const INSTAGRAM_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r=".6" fill="currentColor" stroke="none"/></svg>`;
+
+function footer(instagramUrl) {
+  const social = instagramUrl
+    ? `<nav class="social" aria-label="Social"><a href="${esc(instagramUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Instagram - Noam Uzan Photography">${INSTAGRAM_ICON}</a></nav>`
+    : '';
+  return `<footer class="foot">${social}<p lang="en" dir="ltr">&copy; Noam Uzan Photography</p></footer>`;
+}
 
 const ARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>`;
 
@@ -111,7 +124,7 @@ function commonHead() {
  * e: { slug, title, date, description, driveUrl, coverAlt }
  * og: { pageUrl, imageUrl, imageFile, width, height, mime, ogDescription }
  */
-export function renderEventPage(e, og) {
+export function renderEventPage(e, og, instagramUrl) {
   const iso = isoDate(e.date);
   const dateHtml = iso ? `<time datetime="${iso}">${esc(e.date)}</time>` : esc(e.date);
   const alt = e.coverAlt || `${e.title} – ${e.date}`;
@@ -162,13 +175,13 @@ ${e.description ? `<p class="desc up">${esc(e.description)}</p>` : ''}
 <p class="hint up">הגלריה נפתחת ב-Google Drive</p>
 </section>
 </main>
-${FOOTER}
+${footer(instagramUrl)}
 </body>
 </html>
 `;
 }
 
-export function renderHomePage(siteUrl) {
+export function renderHomePage(siteUrl, instagramUrl) {
   return `<!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -192,13 +205,13 @@ ${commonHead()}
 <h1 class="up">Photography Galleries</h1>
 <p class="msg up">Received a gallery link? Open it directly from your message.</p>
 </main>
-${FOOTER}
+${footer(instagramUrl)}
 </body>
 </html>
 `;
 }
 
-export function renderNotFoundPage(siteUrl) {
+export function renderNotFoundPage(siteUrl, instagramUrl) {
   return `<!doctype html>
 <html lang="he" dir="rtl">
 <head>
@@ -215,7 +228,7 @@ ${commonHead()}
 <h1 class="up" lang="en" dir="ltr">Page not found</h1>
 <p class="msg up">הקישור שגוי או שהגלריה אינה זמינה. מומלץ לבדוק שהקישור הועתק במלואו. <a href="${esc(siteUrl)}/">לדף הבית</a></p>
 </main>
-${FOOTER}
+${footer(instagramUrl)}
 </body>
 </html>
 `;

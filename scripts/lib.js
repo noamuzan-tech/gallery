@@ -19,7 +19,10 @@ export const COVER_NAMES = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'
 export function readConfig() {
   const raw = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
   const siteUrl = String(raw.siteUrl || '').trim().replace(/\/+$/, '');
-  return { ...raw, siteUrl };
+  // "instagram" may be a handle ("noamuzan", "@noamuzan") or a full URL. Empty = no icon.
+  const ig = String(raw.instagram || '').trim();
+  const instagramUrl = !ig ? '' : /^https?:\/\//.test(ig) ? ig : `https://www.instagram.com/${ig.replace(/^@/, '')}/`;
+  return { ...raw, siteUrl, instagramUrl };
 }
 
 export function validateSlug(slug) {
