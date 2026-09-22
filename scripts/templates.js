@@ -72,6 +72,42 @@ transition:transform .25s var(--ease),box-shadow .25s var(--ease),background-col
 .cta:active{transform:translateY(0) scale(.99)}
 .cta:focus-visible{outline:3px solid var(--fg);outline-offset:4px}
 .hint{margin:.9rem 0 0;font-size:.78rem;color:var(--muted)}
+.share{margin-top:.9rem;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;
+width:100%;max-width:420px;min-height:52px;padding:.8rem 1.5rem;border-radius:999px;border:1px solid rgba(244,241,234,.28);
+background:transparent;color:var(--fg);font:inherit;font-size:1rem;font-weight:500;cursor:pointer;
+transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
+.share[hidden]{display:none}
+.share:hover{background:rgba(244,241,234,.06);border-color:rgba(244,241,234,.5)}
+.share:active{transform:scale(.99)}
+.share:focus-visible{outline:3px solid var(--fg);outline-offset:4px}
+.share svg{width:18px;height:18px;flex:none}
+.credit{margin:1.75rem 0 0;font-size:.88rem;color:var(--muted)}
+.credit a{color:var(--fg);text-decoration:none;border-bottom:1px solid rgba(244,241,234,.35);direction:ltr;unicode-bidi:isolate}
+.credit a:hover{border-color:var(--fg)}
+.credit a:focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:2px}
+.help{margin-top:1.5rem;width:100%;max-width:420px;border:1px solid var(--line);border-radius:16px;text-align:start;background:rgba(244,241,234,.02)}
+.help summary{list-style:none;cursor:pointer;padding:1rem 1.25rem;font-size:.95rem;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-radius:16px}
+.help summary::-webkit-details-marker{display:none}
+.help summary::after{content:"+";font-size:1.3rem;line-height:1;color:var(--muted);transition:transform .25s var(--ease)}
+.help[open] summary::after{transform:rotate(45deg)}
+.help summary:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.help-body{padding:0 1.25rem 1.1rem;font-size:.9rem;color:#d6d2ca}
+.help-body h3{margin:.9rem 0 .35rem;font-size:.85rem;font-weight:600;color:var(--fg)}
+.help-body ol{margin:0;padding-inline-start:1.2rem}
+.help-body li{margin:.2rem 0}
+.book{margin:3.5rem auto 0;padding:0 1.5rem;text-align:center;max-width:480px}
+.book-card{border-top:1px solid var(--line);padding-top:2.25rem}
+.book h2{margin:0;font-size:1.15rem;font-weight:600}
+.book p{margin:.5rem 0 0;font-size:.92rem;color:var(--muted)}
+.wa{margin-top:1.25rem;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:50px;padding:.75rem 1.6rem;border-radius:999px;
+background:#25d366;color:#07351b;text-decoration:none;font-weight:600;font-size:.98rem;transition:transform .25s var(--ease),filter .25s}
+.wa:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.wa:focus-visible{outline:3px solid var(--fg);outline-offset:4px}
+.wa svg{width:20px;height:20px;flex:none}
+.toast{position:fixed;inset-inline:0;bottom:calc(1.5rem + env(safe-area-inset-bottom));margin:auto;width:max-content;max-width:90vw;
+padding:.7rem 1.2rem;border-radius:999px;background:var(--fg);color:#0a0a0a;font-size:.9rem;font-weight:500;
+opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s var(--ease);pointer-events:none}
+.toast.show{opacity:1;transform:none}
 .content>.up:nth-child(1){animation-delay:.25s}
 .content>.up:nth-child(2){animation-delay:.35s}
 .content>.up:nth-child(3){animation-delay:.45s}
@@ -79,6 +115,7 @@ transition:transform .25s var(--ease),box-shadow .25s var(--ease),background-col
 .content>.up:nth-child(5){animation-delay:.65s}
 .content>.up:nth-child(6){animation-delay:.75s}
 .content>.up:nth-child(7){animation-delay:.85s}
+.content>.up:nth-child(n+8){animation-delay:.95s}
 @media (min-width:600px) and (max-width:767px){.hero{aspect-ratio:16/9}}
 @media (min-width:768px){
 .page{padding:3rem 2rem 0}
@@ -117,6 +154,48 @@ function footer({ instagramUrl }) {
     ? `<nav class="social" aria-label="Social"><a href="${esc(instagramUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Instagram - Noam Uzan Photography">${INSTAGRAM_ICON}</a></nav>`
     : '';
   return `<footer class="foot">${social}<p lang="en" dir="ltr">&copy; Noam Uzan Photography</p></footer>`;
+}
+
+const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>`;
+
+const CHAT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>`;
+
+// Minimal progressive enhancement: the share button stays hidden without JavaScript.
+// Uses the phone's native share sheet, or copies the link on desktop.
+const SHARE_SCRIPT = `(function(){var b=document.getElementById('share');if(!b)return;b.hidden=false;
+var t=document.getElementById('toast');function toast(m){t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+b.addEventListener('click',function(){var d={title:b.dataset.title,url:b.dataset.url};
+if(navigator.share){navigator.share(d).catch(function(){});return}
+if(navigator.clipboard){navigator.clipboard.writeText(d.url).then(function(){toast('הקישור הועתק')},function(){prompt('העתיקו את הקישור:',d.url)})}
+else{prompt('העתיקו את הקישור:',d.url)}})})();`;
+
+const DOWNLOAD_HELP = `<details class="help up">
+<summary>איך מורידים את התמונות?</summary>
+<div class="help-body">
+<h3>תמונה בודדת מהטלפון</h3>
+<ol>
+<li>לוחצים על "לצפייה בגלריה המלאה" ופותחים את התמונה.</li>
+<li>לוחצים על שלוש הנקודות <span aria-hidden="true">⋮</span> ובוחרים "הורדה".</li>
+<li>באייפון: בוחרים "שליחת עותק" ואז "שמירת תמונה", והיא נשמרת בגלריה.</li>
+</ol>
+<h3>כל הגלריה בבת אחת (מהמחשב)</h3>
+<ol>
+<li>פותחים את הגלריה במחשב.</li>
+<li>לוחצים על שם התיקייה בראש העמוד ובוחרים "הורדה".</li>
+<li>Google Drive מכין קובץ ZIP עם כל התמונות באיכות מלאה.</li>
+</ol>
+</div>
+</details>`;
+
+function bookingSection(site, eventTitle) {
+  if (!site.whatsapp) return '';
+  const text = `היי נועם, הגעתי מהגלריה "${eventTitle}" ואשמח לשמוע על צילום לאירוע שלנו`;
+  const href = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
+  return `<section class="book" aria-labelledby="book-title"><div class="book-card">
+<h2 id="book-title">רוצים צילום לאירוע שלכם?</h2>
+<p>משחקים, אירועי ספורט ואירועים פרטיים. שלחו לי הודעה ונתאם.</p>
+<a class="wa" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שליחת הודעה בוואטסאפ</span></a>
+</div></section>`;
 }
 
 const ARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>`;
@@ -183,9 +262,15 @@ ${e.description ? `<p class="desc up">${esc(e.description)}</p>` : ''}
 <span>לצפייה בגלריה המלאה</span>${ARROW}
 </a>
 <p class="hint up">הגלריה נפתחת ב-Google Drive</p>
+<button class="share up" id="share" type="button" hidden data-url="${esc(og.pageUrl)}" data-title="${esc(e.title)}">${SHARE_ICON}<span>שיתוף הגלריה</span></button>
+${site.instagramHandle ? `<p class="credit up">מעלים לאינסטגרם? אשמח לתיוג <a href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer">@${esc(site.instagramHandle)}</a></p>` : ''}
+${DOWNLOAD_HELP}
 </section>
 </main>
+${bookingSection(site, e.title)}
 ${footer(site)}
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>${SHARE_SCRIPT}</script>
 </body>
 </html>
 `;

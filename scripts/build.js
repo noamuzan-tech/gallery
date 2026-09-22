@@ -139,7 +139,7 @@ if (fs.existsSync(logoPath)) {
   const buf = fs.readFileSync(logoPath);
   logo = { src: `data:image/png;base64,${buf.toString('base64')}`, width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
 }
-const site = { siteUrl: config.siteUrl, instagramUrl: config.instagramUrl, logo };
+const site = { siteUrl: config.siteUrl, instagramUrl: config.instagramUrl, instagramHandle: config.instagramHandle, whatsapp: config.whatsapp, logo };
 
 fs.rmSync(DIST_DIR, { recursive: true, force: true });
 fs.mkdirSync(DIST_DIR, { recursive: true });

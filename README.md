@@ -81,6 +81,8 @@ There's exactly **one** place: **`site.config.json`**.
 ```
 
 Replace `USERNAME` with your GitHub username, for example `https://noamuzan.github.io/gallery`. Leave off the trailing slash.
+Optional: `"whatsapp": "0501234567"` shows a "רוצים צילום לאירוע שלכם?" section with a WhatsApp button (pre-filled message mentioning the event). Leave it empty to hide it.
+
 Optional: add `"instagram": "your_handle"` (or a full Instagram URL) to show a clickable Instagram icon at the bottom of every page. Leave it empty to hide the icon.
 
 Every Open Graph URL is built from this value. The automatic deployment **refuses to build** while it still says `USERNAME`, so you can't publish broken previews by mistake.

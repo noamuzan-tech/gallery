@@ -22,7 +22,11 @@ export function readConfig() {
   // "instagram" may be a handle ("noamuzan", "@noamuzan") or a full URL. Empty = no icon.
   const ig = String(raw.instagram || '').trim();
   const instagramUrl = !ig ? '' : /^https?:\/\//.test(ig) ? ig : `https://www.instagram.com/${ig.replace(/^@/, '')}/`;
-  return { ...raw, siteUrl, instagramUrl };
+  // "whatsapp": phone number for the booking button, e.g. "0501234567" or "972501234567". Empty = no button.
+  let whatsapp = String(raw.whatsapp || '').replace(/\D/g, '');
+  if (whatsapp.startsWith('0')) whatsapp = `972${whatsapp.slice(1)}`;
+  const instagramHandle = instagramUrl ? instagramUrl.replace(/\/+$/, '').split('/').pop() : '';
+  return { ...raw, siteUrl, instagramUrl, instagramHandle, whatsapp };
 }
 
 export function validateSlug(slug) {
