@@ -46,10 +46,10 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 background:linear-gradient(180deg,rgba(10,10,10,.35) 0%,rgba(10,10,10,.85) 55%,var(--bg) 100%)}
 .page{width:100%;max-width:1040px;margin:0 auto}
 .hero{position:relative;margin:0;overflow:hidden;aspect-ratio:4/3;max-height:62vh;max-height:62svh;width:100%;
--webkit-mask-image:linear-gradient(180deg,#000 58%,transparent 100%);mask-image:linear-gradient(180deg,#000 58%,transparent 100%)}
+-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
 .hero img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,center);animation:reveal 1.4s var(--ease) both}
 @keyframes reveal{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
-.content{position:relative;margin-top:-2.5rem;padding:0 1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center}
+.content{position:relative;margin-top:-.75rem;padding:0 1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center}
 .title{margin:0;font-size:clamp(1.65rem,6.4vw,2.6rem);line-height:1.2;font-weight:700;letter-spacing:-.01em;max-width:22ch;text-wrap:balance}
 .date{margin:.9rem 0 0;font-size:.95rem;color:var(--muted);letter-spacing:.14em;font-variant-numeric:tabular-nums}
 .desc{margin:1rem 0 0;font-size:1.02rem;color:#d6d2ca;max-width:34ch;text-wrap:pretty}
