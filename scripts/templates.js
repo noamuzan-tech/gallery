@@ -275,18 +275,25 @@ function ctaBlock(e, site) {
 </a>
 <p class="hint up">הגלריה נפתחת בגוגל דרייב</p>`;
   }
-  // Coming soon: sign up for a notification (Google Form / any URL from site config, or WhatsApp), Instagram meanwhile.
-  const notifyHref = site.notifyUrl
-    || (site.whatsapp ? waLink(site, `היי נועם, אשמח לקבל הודעה כשהגלריה "${e.title}" עולה`) : '');
-  const notify = notifyHref
-    ? `<a class="cta" href="${esc(notifyHref)}" target="_blank" rel="noopener noreferrer">${BELL_ICON}<span>עדכנו אותי כשהגלריה עולה</span></a>`
+  // Coming soon: Instagram is the main call to action (grows followers, no flood of WhatsApp messages).
+  // If site.notifyUrl is set (a newsletter sign-up form), it becomes the main button and Instagram the secondary one.
+  const notify = site.notifyUrl
+    ? `<a class="cta" href="${esc(site.notifyUrl)}" target="_blank" rel="noopener noreferrer">${BELL_ICON}<span>עדכנו אותי כשהגלריה עולה</span></a>`
     : '';
   const ig = site.instagramUrl
-    ? `<a class="ghost" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer"><span class="ig-dot">${INSTAGRAM_ICON}</span><span>בינתיים, באינסטגרם</span></a>`
+    ? notify
+      ? `<a class="ghost" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer"><span class="ig-dot">${INSTAGRAM_ICON}</span><span>בינתיים, באינסטגרם</span></a>`
+      : `<a class="cta" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer">${INSTAGRAM_ICON}<span>עקבו באינסטגרם</span></a>
+<p class="hint" dir="ltr">@${esc(site.instagramHandle)}</p>`
     : '';
+  const text = notify
+    ? 'התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה. רוצים לקבל הודעה ברגע שהן עולות?'
+    : site.instagramUrl
+      ? 'התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה. בינתיים, עקבו באינסטגרם ותהיו הראשונים לדעת כשהגלריה עולה.'
+      : 'התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה.';
   return `<div class="soon up">
 <span class="badge">הגלריה בהכנה</span>
-<p>התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה.${notify ? ' רוצים לקבל הודעה ברגע שהן עולות?' : ''}</p>
+<p>${text}</p>
 ${notify}
 ${ig}
 </div>`;

@@ -306,9 +306,9 @@ Create the event without a Drive link and add `"comingSoon": true`:
 }
 ```
 
-The page shows **"הגלריה בהכנה"**, a **"עדכנו אותי כשהגלריה עולה"** button and an Instagram button. When the gallery is ready, **paste the Drive link into `driveUrl`** and push. The page switches to the normal gallery page automatically, at the same URL, so the printed QR code keeps working. (`npm run new-event` does this for you if you leave the Drive URL empty.)
+The page shows **"הגלריה בהכנה"** and a big **"עקבו באינסטגרם"** button (grows your followers, and nobody needs to message you). When the gallery is ready, **paste the Drive link into `driveUrl`** and push. The page switches to the normal gallery page automatically, at the same URL, so the printed QR code keeps working. (`npm run new-event` does this for you if you leave the Drive URL empty.)
 
-The notify button opens WhatsApp with a ready message ("אשמח לקבל הודעה כשהגלריה ... עולה"), so sign-ups arrive as WhatsApp chats and you reply with the link (or add them to a WhatsApp broadcast list). To collect sign-ups in a Google Form instead, add `"notifyUrl": "https://forms.gle/..."` to `site.config.json`.
+To collect newsletter sign-ups instead, add `"notifyUrl": "https://..."` (a sign-up form) to `site.config.json`: the main button becomes **"עדכנו אותי כשהגלריה עולה"** and Instagram moves to a secondary button.
 
 WhatsApp caches previews: people who got the link while it was "coming soon" may still see "הגלריה בהכנה" in the old preview text. The page itself is always up to date.
 
@@ -327,9 +327,9 @@ Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`)
 |---|---|
 | `siteUrl` | Public address of the site (no trailing slash). |
 | `instagram` | Instagram handle. Shows the Instagram icon, the tag request and the Instagram button on coming-soon pages. |
-| `whatsapp` | Phone number. Shows the "רוצים צילום לאירוע שלכם?" button and powers the coming-soon notify button. |
+| `whatsapp` | Phone number. Shows the "רוצים צילום לאירוע שלכם?" booking button. |
 | `mainSite` | Your main website. Linked from the home page. |
-| `notifyUrl` | Optional sign-up form (e.g. Google Form) for coming-soon pages instead of WhatsApp. |
+| `notifyUrl` | Optional newsletter sign-up form for coming-soon pages. Replaces Instagram as the main button. |
 
 ## Quick reference
 
