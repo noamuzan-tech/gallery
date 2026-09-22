@@ -110,8 +110,8 @@ for (const folder of folders) {
     if (!event.date) errors.push('date is missing');
     const driveErr = validateDriveUrl(event.driveUrl);
     if (driveErr) errors.push(driveErr);
-    if (!COVER_POSITIONS.includes(event.coverPosition)) {
-      errors.push(`coverPosition must be one of: ${COVER_POSITIONS.join(', ')}`);
+    if (!COVER_POSITIONS.includes(event.coverPosition) && !parsePercent(event.coverPosition)) {
+      errors.push(`coverPosition must be one of: ${COVER_POSITIONS.join(', ')}, or a height percentage like "30%"`);
     }
   }
 
@@ -218,11 +218,26 @@ async function processCover(e) {
     .slice(0, 8);
 
   if (sharp) {
+    const focusY = parsePercent(e.coverPosition);
+    if (focusY != null) {
+      // Vertical focus point for tall (portrait) covers: "30%" keeps the band around 30% from the top.
+      const { data, info } = await sharp(source).rotate().resize({ width: OG_WIDTH }).toBuffer({ resolveWithObject: true });
+      if (info.height > OG_HEIGHT) {
+        const top = Math.round(Math.min(Math.max(focusY * info.height - OG_HEIGHT / 2, 0), info.height - OG_HEIGHT));
+        const crop = (quality) => sharp(data)
+          .extract({ left: 0, top, width: OG_WIDTH, height: OG_HEIGHT })
+          .jpeg({ quality, mozjpeg: true, progressive: true })
+          .toBuffer();
+        let buffer = await crop(82);
+        if (buffer.length > WHATSAPP_SAFE_BYTES) buffer = await crop(70);
+        return { buffer, file: `cover-${hash}.jpg`, width: OG_WIDTH, height: OG_HEIGHT, mime: 'image/jpeg' };
+      }
+    }
     const pipeline = (quality) => sharp(source)
       .rotate() // respect EXIF orientation
       .resize(OG_WIDTH, OG_HEIGHT, {
         fit: 'cover',
-        position: e.coverPosition === 'attention' ? sharp.strategy.attention : e.coverPosition,
+        position: parsePercent(e.coverPosition) != null ? 'center' : e.coverPosition === 'attention' ? sharp.strategy.attention : e.coverPosition,
       })
       .jpeg({ quality, mozjpeg: true, progressive: true })
       .toBuffer();
@@ -240,6 +255,12 @@ async function processCover(e) {
     height: size.height,
     mime: isPng ? 'image/png' : 'image/jpeg',
   };
+}
+
+// "30%" -> 0.3, anything else -> null
+function parsePercent(value) {
+  const m = /^(\d{1,3})%$/.exec(value);
+  return m && Number(m[1]) <= 100 ? Number(m[1]) / 100 : null;
 }
 
 // Minimal JPEG/PNG dimension reader, used only when sharp is unavailable.

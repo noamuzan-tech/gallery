@@ -128,7 +128,7 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `description` | optional | Short line shown on the page and in the WhatsApp preview. |
 | `driveUrl` | ✅ | Must start with `https://`. |
 | `coverAlt` | optional | Accessibility text for the cover. Defaults to "title – date". |
-| `coverPosition` | optional | How to crop a cover that isn't 1.91:1: `center` (default), `top`, `bottom`, `left`, `right` or `attention` (auto-detects the interesting area). |
+| `coverPosition` | optional | How to crop a cover that isn't 1.91:1: `center` (default), `top`, `bottom`, `left`, `right`, `attention` (auto-detects the interesting area), or a **height percentage** such as `"30%"` for portrait photos (keeps the strip around 30% from the top, e.g. the player's face). |
 
 Then build and publish:
 
