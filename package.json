@@ -15,5 +15,8 @@
   },
   "optionalDependencies": {
     "sharp": "^0.35.4"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }

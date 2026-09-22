@@ -29,15 +29,20 @@ const slug = await ask('Event slug (e.g. beitar-maccabi): ', {
 const title = await ask('Event title: ');
 const date = await ask('Event date (DD.MM.YYYY): ');
 const description = await ask('Description (optional): ', { required: false });
-const driveUrl = await ask('Google Drive URL: ', { validate: validateDriveUrl });
+const driveUrl = await ask('Google Drive URL (leave empty if the gallery is not ready yet): ', { required: false, validate: validateDriveUrl });
+const accentColor = await ask('Accent colour (optional, e.g. #f5c400): ', {
+  required: false,
+  validate: (v) => (/^#[0-9a-f]{6}$/i.test(v) ? null : 'Use a hex colour like #f5c400'),
+});
 rl.close();
+
+const event = { slug, title, date, description, driveUrl };
+if (!driveUrl) event.comingSoon = true;
+if (accentColor) event.accentColor = accentColor;
 
 const dir = path.join(EVENTS_DIR, slug);
 fs.mkdirSync(dir, { recursive: true });
-fs.writeFileSync(
-  path.join(dir, 'event.json'),
-  JSON.stringify({ slug, title, date, description, driveUrl }, null, 2) + '\n',
-);
+fs.writeFileSync(path.join(dir, 'event.json'), JSON.stringify(event, null, 2) + '\n');
 
 const { siteUrl } = readConfig();
 console.log(`
@@ -48,4 +53,9 @@ events/${slug}/cover.jpg
 
 Then run "npm run build" and push. The page will be live at:
 ${siteUrl}/${slug}/
+
+Printable QR code: ${siteUrl}/${slug}/qr/${driveUrl ? '' : `
+
+Coming-soon mode is on. When the gallery is ready, just paste the Drive link
+into events/${slug}/event.json ("driveUrl"), build and push.`}
 `);

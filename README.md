@@ -132,6 +132,8 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `description` | optional | Short line shown on the page and in the WhatsApp preview. |
 | `driveUrl` | ✅ | Must start with `https://`. |
 | `coverAlt` | optional | Accessibility text for the cover. Defaults to "title – date". |
+| `accentColor` | optional | Hex colour for the button, e.g. `"#f5c400"`. See section 15. |
+| `comingSoon` | optional | `true` = gallery not ready yet (no Drive link needed). See section 15. |
 | `coverPosition` | optional | How to crop a cover that isn't 1.91:1: `center` (default), `top`, `bottom`, `left`, `right`, `attention` (auto-detects the interesting area), or a **height percentage** such as `"30%"` for portrait photos (keeps the strip around 30% from the top, e.g. the player's face). |
 
 Then build and publish:
@@ -285,6 +287,49 @@ Example: `https://gallery.noamuzan.com`
 GitHub automatically redirects the old `USERNAME.github.io/gallery/...` links to the new domain, so links you already sent keep working. Their WhatsApp previews in old messages won't change.
 
 ---
+
+## 15. Extra features
+
+### Accent colour per event
+Add `"accentColor": "#f5c400"` to `event.json`. The main button, the small divider and the "coming soon" badge use that colour. Text on the button automatically switches between black and white for contrast.
+
+### "Coming soon" pages (print the QR before the gallery exists)
+Create the event without a Drive link and add `"comingSoon": true`:
+
+```json
+{
+  "slug": "derby-2026",
+  "title": "מכבי נגד הפועל",
+  "date": "30.09.2026",
+  "driveUrl": "",
+  "comingSoon": true
+}
+```
+
+The page shows **"הגלריה בהכנה"**, a **"עדכנו אותי כשהגלריה עולה"** button and an Instagram button. When the gallery is ready, **paste the Drive link into `driveUrl`** and push. The page switches to the normal gallery page automatically, at the same URL, so the printed QR code keeps working. (`npm run new-event` does this for you if you leave the Drive URL empty.)
+
+The notify button opens WhatsApp with a ready message ("אשמח לקבל הודעה כשהגלריה ... עולה"), so sign-ups arrive as WhatsApp chats and you reply with the link (or add them to a WhatsApp broadcast list). To collect sign-ups in a Google Form instead, add `"notifyUrl": "https://forms.gle/..."` to `site.config.json`.
+
+WhatsApp caches previews: people who got the link while it was "coming soon" may still see "הגלריה בהכנה" in the old preview text. The page itself is always up to date.
+
+### QR codes
+Every build creates, per event:
+- `https://gallery.noamuzan.media/<slug>/qr/`: a printable A5 card (logo, title, QR). Use "הדפסה או שמירה כקובץ PDF".
+- `.../<slug>/qr.png`: the QR alone, 1200 px
+- `.../<slug>/qr.svg`: vector, for a designer
+
+### Highlights strip
+Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`). They're cropped to 4:5 around the interesting part, compressed, and shown as a swipeable "רגעים מהגלריה" strip under the button. Without that folder, nothing is shown. (Later, an automatic Drive picker can simply fill this folder.)
+
+### Site-wide settings (`site.config.json`)
+
+| Key | Meaning |
+|---|---|
+| `siteUrl` | Public address of the site (no trailing slash). |
+| `instagram` | Instagram handle. Shows the Instagram icon, the tag request and the Instagram button on coming-soon pages. |
+| `whatsapp` | Phone number. Shows the "רוצים צילום לאירוע שלכם?" button and powers the coming-soon notify button. |
+| `mainSite` | Your main website. Linked from the home page. |
+| `notifyUrl` | Optional sign-up form (e.g. Google Form) for coming-soon pages instead of WhatsApp. |
 
 ## Quick reference
 

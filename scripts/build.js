@@ -5,17 +5,22 @@
 //   dist/404.html
 //   dist/<slug>/index.html     event landing page with static Open Graph tags
 //   dist/<slug>/cover-<hash>.jpg
+//   dist/<slug>/h-<hash>.jpg     optional highlight thumbnails (events/<slug>/highlights/)
+//   dist/<slug>/qr.png, qr.svg   QR code of the page URL
+//   dist/<slug>/qr/index.html    printable QR card
+//   dist/assets/                 icon + home page preview image
 //
 // Folders in events/ whose name starts with "_" or "." (like events/_example) are skipped.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import QRCode from 'qrcode';
 import {
   ROOT, EVENTS_DIR, DIST_DIR, COVER_NAMES,
   readConfig, validateSlug, validateDriveUrl,
 } from './lib.js';
-import { renderEventPage, renderHomePage, renderNotFoundPage } from './templates.js';
+import { renderEventPage, renderHomePage, renderNotFoundPage, renderQrPage } from './templates.js';
 
 // Bump this if the image pipeline below changes, so every cover gets a new filename
 // (and WhatsApp is forced to fetch it again).
@@ -24,6 +29,8 @@ const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 const COVER_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'attention'];
 const WHATSAPP_SAFE_BYTES = 300 * 1024;
+const MAX_HIGHLIGHTS = 8;
+const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
 
 const c = {
   red: (s) => `\x1b[31m${s}\x1b[0m`,
@@ -98,6 +105,9 @@ for (const folder of folders) {
     driveUrl: str('driveUrl'),
     coverAlt: str('coverAlt'),
     coverPosition: str('coverPosition') || 'center',
+    accentColor: str('accentColor'),
+    // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.
+    comingSoon: data.comingSoon === true && !str('driveUrl'),
   };
 
   if (!errors.length) {
@@ -108,8 +118,13 @@ for (const folder of folders) {
     }
     if (!event.title) errors.push('title is missing');
     if (!event.date) errors.push('date is missing');
-    const driveErr = validateDriveUrl(event.driveUrl);
-    if (driveErr) errors.push(driveErr);
+    if (!event.comingSoon || event.driveUrl) {
+      const driveErr = validateDriveUrl(event.driveUrl);
+      if (driveErr) errors.push(event.driveUrl ? driveErr : `${driveErr} (or set "comingSoon": true if the gallery is not ready yet)`);
+    }
+    if (event.accentColor && !/^#[0-9a-f]{6}$/i.test(event.accentColor)) {
+      errors.push(`accentColor must be a hex colour like "#f5c400" (got "${event.accentColor}")`);
+    }
     if (!COVER_POSITIONS.includes(event.coverPosition) && !parsePercent(event.coverPosition)) {
       errors.push(`coverPosition must be one of: ${COVER_POSITIONS.join(', ')}, or a height percentage like "30%"`);
     }
@@ -132,17 +147,25 @@ if (problems.length) fail(problems);
 
 // ---------- build ----------
 
-// Logo (assets/logo.png, made by scripts/make-logo.js) is inlined into every page.
-const logoPath = path.join(ROOT, 'assets', 'logo.png');
-let logo = null;
-if (fs.existsSync(logoPath)) {
-  const buf = fs.readFileSync(logoPath);
-  logo = { src: `data:image/png;base64,${buf.toString('base64')}`, width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
-}
-const site = { siteUrl: config.siteUrl, instagramUrl: config.instagramUrl, instagramHandle: config.instagramHandle, whatsapp: config.whatsapp, logo };
+// Logos (made by scripts/make-logo.js) are inlined into the pages.
+const logo = inlinePng(path.join(ROOT, 'assets', 'logo.png'));
+const logoDark = inlinePng(path.join(ROOT, 'assets', 'logo-dark.png'));
 
 fs.rmSync(DIST_DIR, { recursive: true, force: true });
-fs.mkdirSync(DIST_DIR, { recursive: true });
+fs.mkdirSync(path.join(DIST_DIR, 'assets'), { recursive: true });
+
+const site = {
+  siteUrl: config.siteUrl,
+  instagramUrl: config.instagramUrl,
+  instagramHandle: config.instagramHandle,
+  whatsapp: config.whatsapp,
+  notifyUrl: config.notifyUrl || '',
+  mainSiteUrl: config.mainSite || '',
+  logo,
+  logoDark,
+  iconUrl: copyAsset(path.join(ROOT, 'assets', 'icon.png'), 'icon'),
+  homeOg: await buildHomeOgImage(),
+};
 
 const warnings = [];
 for (const e of events) {
@@ -160,6 +183,16 @@ for (const e of events) {
   }
 
   const pageUrl = `${config.siteUrl}/${e.slug}/`;
+  if (e.accentColor) e.accent = { color: e.accentColor, on: textColorOn(e.accentColor) };
+  e.highlights = await processHighlights(e, outDir, warnings);
+
+  // QR code: PNG for printing, SVG for designers, and a printable card page
+  fs.writeFileSync(path.join(outDir, 'qr.png'), await QRCode.toBuffer(pageUrl, { width: 1200, margin: 2, errorCorrectionLevel: 'M' }));
+  fs.writeFileSync(path.join(outDir, 'qr.svg'), await QRCode.toString(pageUrl, { type: 'svg', margin: 2, errorCorrectionLevel: 'M' }));
+  const qrInline = await QRCode.toString(pageUrl, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0a0a0aff', light: '#ffffff00' } });
+  fs.mkdirSync(path.join(outDir, 'qr'), { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'qr', 'index.html'), renderQrPage(e, pageUrl, qrInline, site));
+
   const html = renderEventPage(e, {
     pageUrl,
     imageUrl: `${pageUrl}${cover.file}`,
@@ -168,7 +201,7 @@ for (const e of events) {
     height: cover.height,
     mime: cover.mime,
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
-    ogDescription: [e.date, e.description].filter(Boolean).join(' · '),
+    ogDescription: [e.date, e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description].filter(Boolean).join(' · '),
   }, site);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);
   e.pageUrl = pageUrl;
@@ -184,12 +217,79 @@ fs.writeFileSync(path.join(DIST_DIR, '.nojekyll'), '');
 console.log(c.green(c.bold(`✓ Built ${events.length} event page(s) into dist/`)));
 console.log(c.dim(`  Home: ${config.siteUrl}/`));
 for (const e of events) {
-  console.log(`  ${c.bold(e.slug.padEnd(24))} ${e.pageUrl}  ${c.dim(e.coverFile)}`);
+  const tag = e.comingSoon ? c.yellow(' [coming soon]') : '';
+  console.log(`  ${c.bold(e.slug.padEnd(24))} ${e.pageUrl}${tag}  ${c.dim(`QR: ${e.pageUrl}qr/`)}`);
 }
 if (!events.length) console.log(c.dim('  (no events yet - run "npm run new-event" or duplicate events/_example)'));
 for (const w of warnings) console.warn(c.yellow(`! ${w}`));
 
 // ---------- helpers ----------
+
+function inlinePng(file) {
+  if (!fs.existsSync(file)) return null;
+  const buf = fs.readFileSync(file);
+  return { src: `data:image/png;base64,${buf.toString('base64')}`, width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+
+// Copies an asset into dist/assets/ with a content hash in its name; returns its absolute URL.
+function copyAsset(file, name) {
+  if (!fs.existsSync(file)) return '';
+  const buf = fs.readFileSync(file);
+  const out = `${name}-${crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8)}${path.extname(file)}`;
+  fs.writeFileSync(path.join(DIST_DIR, 'assets', out), buf);
+  return `${config.siteUrl}/assets/${out}`;
+}
+
+// 1200x630 preview image for the home page: the logo on the dark background.
+async function buildHomeOgImage() {
+  const logoFile = path.join(ROOT, 'assets', 'logo.png');
+  if (!sharp || !fs.existsSync(logoFile)) return null;
+  const logoBuf = await sharp(logoFile).resize({ width: 640 }).toBuffer();
+  const meta = await sharp(logoBuf).metadata();
+  const lineY = Math.round(OG_HEIGHT / 2 + meta.height / 2 + 34);
+  const bg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}"><defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#1d1c1a"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><rect x="570" y="${lineY}" width="60" height="2" fill="#f4f1ea" fill-opacity=".35"/></svg>`);
+  const buf = await sharp(bg)
+    .composite([{ input: logoBuf, left: Math.round((OG_WIDTH - meta.width) / 2), top: Math.round((OG_HEIGHT - meta.height) / 2) }])
+    .jpeg({ quality: 85, mozjpeg: true })
+    .toBuffer();
+  const file = `og-home-${crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8)}.jpg`;
+  fs.writeFileSync(path.join(DIST_DIR, 'assets', file), buf);
+  return { url: `${config.siteUrl}/assets/${file}`, width: OG_WIDTH, height: OG_HEIGHT };
+}
+
+// Optional events/<slug>/highlights/*.jpg -> small 4:5 thumbnails shown under the button.
+async function processHighlights(e, outDir, warnings) {
+  const dir = path.join(EVENTS_DIR, e.folder, 'highlights');
+  if (!fs.existsSync(dir)) return [];
+  let files = fs.readdirSync(dir).filter((f) => IMAGE_RE.test(f)).sort();
+  if (!files.length) return [];
+  if (!sharp) { warnings.push(`${e.slug}: highlights need "sharp" - run npm install`); return []; }
+  if (files.length > MAX_HIGHLIGHTS) {
+    warnings.push(`${e.slug}: ${files.length} highlight images found, only the first ${MAX_HIGHLIGHTS} are used`);
+    files = files.slice(0, MAX_HIGHLIGHTS);
+  }
+  const out = [];
+  for (const f of files) {
+    const source = fs.readFileSync(path.join(dir, f));
+    const hash = crypto.createHash('sha256').update(source).update(`|h${PIPELINE_VERSION}`).digest('hex').slice(0, 8);
+    const buffer = await sharp(source).rotate()
+      .resize(480, 600, { fit: 'cover', position: sharp.strategy.attention })
+      .jpeg({ quality: 78, mozjpeg: true, progressive: true })
+      .toBuffer();
+    const file = `h-${hash}.jpg`;
+    fs.writeFileSync(path.join(outDir, file), buffer);
+    out.push({ file, width: 480, height: 600 });
+  }
+  return out;
+}
+
+// Black or white text, whichever has more contrast on the given background colour.
+function textColorOn(hex) {
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const [r, g, b] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16)));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#0a0a0a' : '#ffffff';
+}
 
 function fail(list) {
   console.error(c.red(c.bold('\n✗ Build failed. Please fix the following:\n')));
