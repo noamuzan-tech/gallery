@@ -30,16 +30,18 @@ line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:c
 img{display:block;max-width:100%}
 .brand{margin:0;display:flex;flex-direction:column;align-items:center;gap:.55rem;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
 .brand-name{font-size:.95rem;font-weight:500;letter-spacing:.42em;margin-right:-.42em}
+.brand-logo{width:min(200px,56vw);height:auto}
 .brand-sub{font-size:.62rem;font-weight:400;letter-spacing:.6em;margin-right:-.6em;color:var(--muted)}
 .rule{width:36px;height:1px;background:var(--line);border:0;margin:1.75rem auto}
 .foot{margin-top:auto;padding:2.5rem 1.5rem calc(2rem + env(safe-area-inset-bottom));text-align:center;font-size:.75rem;letter-spacing:.06em;color:var(--muted)}
 .foot p{margin:0}
 .social{display:flex;justify-content:center;gap:1rem;margin-bottom:1.1rem}
-.social a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;
-color:var(--fg);border:1px solid var(--line);transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
-.social a:hover{background:rgba(244,241,234,.08);border-color:rgba(244,241,234,.35);transform:translateY(-2px)}
+.social a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;color:#fff;
+background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285aeb 90%);
+box-shadow:0 6px 18px -6px rgba(214,36,159,.55);transition:transform .25s var(--ease),box-shadow .25s var(--ease),filter .25s}
+.social a:hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.08);box-shadow:0 10px 24px -6px rgba(214,36,159,.7)}
 .social a:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
-.social svg{width:20px;height:20px}
+.social svg{width:22px;height:22px}
 .up{opacity:0;animation:up .9s var(--ease) forwards}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}}
@@ -88,7 +90,9 @@ transition:transform .25s var(--ease),box-shadow .25s var(--ease),background-col
 const HOME_CSS = `
 .home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 1.5rem}
 .home .brand-name{font-size:clamp(1.3rem,5vw,1.9rem)}
-.home .brand-sub{font-size:clamp(.7rem,2.4vw,.85rem)}
+.home .brand-logo{width:min(320px,76vw)}
+.home .brand-logo{width:min(200px,56vw);height:auto}
+.brand-sub{font-size:clamp(.7rem,2.4vw,.85rem)}
 .home h1{margin:0;font-size:.85rem;font-weight:400;letter-spacing:.28em;margin-right:-.28em;text-transform:uppercase;color:var(--muted)}
 .home p.msg{margin:1rem 0 0;color:var(--muted);font-size:.95rem;max-width:32ch}
 .home a{color:var(--fg);text-underline-offset:4px}
@@ -99,10 +103,16 @@ const HOME_CSS = `
 .home>.up:nth-child(4){animation-delay:.6s}
 `;
 
-const BRAND = `<p class="brand" lang="en" dir="ltr"><span class="brand-name">NOAM UZAN</span><span class="brand-sub">PHOTOGRAPHY</span></p>`;
+// site.logo is a data: URI of assets/logo.png (inlined, so no extra request). Falls back to text.
+function brand(site) {
+  const name = site.logo
+    ? `<img class="brand-logo" src="${site.logo.src}" width="${site.logo.width}" height="${site.logo.height}" alt="NOAM UZAN">`
+    : '<span class="brand-name">NOAM UZAN</span>';
+  return `<p class="brand" lang="en" dir="ltr">${name}<span class="brand-sub">PHOTOGRAPHY</span></p>`;
+}
 const INSTAGRAM_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r=".6" fill="currentColor" stroke="none"/></svg>`;
 
-function footer(instagramUrl) {
+function footer({ instagramUrl }) {
   const social = instagramUrl
     ? `<nav class="social" aria-label="Social"><a href="${esc(instagramUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Instagram - Noam Uzan Photography">${INSTAGRAM_ICON}</a></nav>`
     : '';
@@ -124,7 +134,7 @@ function commonHead() {
  * e: { slug, title, date, description, driveUrl, coverAlt }
  * og: { pageUrl, imageUrl, imageFile, width, height, mime, ogDescription }
  */
-export function renderEventPage(e, og, instagramUrl) {
+export function renderEventPage(e, og, site) {
   const iso = isoDate(e.date);
   const dateHtml = iso ? `<time datetime="${iso}">${esc(e.date)}</time>` : esc(e.date);
   const alt = e.coverAlt || `${e.title} – ${e.date}`;
@@ -164,7 +174,7 @@ ${commonHead()}
 <img src="${esc(og.imageFile)}" width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async">
 </figure>
 <section class="content" aria-labelledby="event-title">
-<div class="up">${BRAND}</div>
+<div class="up">${brand(site)}</div>
 <hr class="rule up" aria-hidden="true">
 <h1 class="title up" id="event-title">${esc(e.title)}</h1>
 <p class="date up">${dateHtml}</p>
@@ -175,13 +185,14 @@ ${e.description ? `<p class="desc up">${esc(e.description)}</p>` : ''}
 <p class="hint up">הגלריה נפתחת ב-Google Drive</p>
 </section>
 </main>
-${footer(instagramUrl)}
+${footer(site)}
 </body>
 </html>
 `;
 }
 
-export function renderHomePage(siteUrl, instagramUrl) {
+export function renderHomePage(site) {
+  const { siteUrl } = site;
   return `<!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -200,18 +211,19 @@ ${commonHead()}
 </head>
 <body>
 <main class="home">
-<div class="up">${BRAND}</div>
+<div class="up">${brand(site)}</div>
 <hr class="rule up" aria-hidden="true">
 <h1 class="up">Photography Galleries</h1>
 <p class="msg up">Received a gallery link? Open it directly from your message.</p>
 </main>
-${footer(instagramUrl)}
+${footer(site)}
 </body>
 </html>
 `;
 }
 
-export function renderNotFoundPage(siteUrl, instagramUrl) {
+export function renderNotFoundPage(site) {
+  const { siteUrl } = site;
   return `<!doctype html>
 <html lang="he" dir="rtl">
 <head>
@@ -223,12 +235,12 @@ ${commonHead()}
 </head>
 <body>
 <main class="home">
-<div class="up">${BRAND}</div>
+<div class="up">${brand(site)}</div>
 <hr class="rule up" aria-hidden="true">
 <h1 class="up" lang="en" dir="ltr">Page not found</h1>
 <p class="msg up">הקישור שגוי או שהגלריה אינה זמינה. מומלץ לבדוק שהקישור הועתק במלואו. <a href="${esc(siteUrl)}/">לדף הבית</a></p>
 </main>
-${footer(instagramUrl)}
+${footer(site)}
 </body>
 </html>
 `;

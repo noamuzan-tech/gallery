@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {
-  EVENTS_DIR, DIST_DIR, COVER_NAMES,
+  ROOT, EVENTS_DIR, DIST_DIR, COVER_NAMES,
   readConfig, validateSlug, validateDriveUrl,
 } from './lib.js';
 import { renderEventPage, renderHomePage, renderNotFoundPage } from './templates.js';
@@ -132,6 +132,15 @@ if (problems.length) fail(problems);
 
 // ---------- build ----------
 
+// Logo (assets/logo.png, made by scripts/make-logo.js) is inlined into every page.
+const logoPath = path.join(ROOT, 'assets', 'logo.png');
+let logo = null;
+if (fs.existsSync(logoPath)) {
+  const buf = fs.readFileSync(logoPath);
+  logo = { src: `data:image/png;base64,${buf.toString('base64')}`, width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+const site = { siteUrl: config.siteUrl, instagramUrl: config.instagramUrl, logo };
+
 fs.rmSync(DIST_DIR, { recursive: true, force: true });
 fs.mkdirSync(DIST_DIR, { recursive: true });
 
@@ -160,14 +169,14 @@ for (const e of events) {
     mime: cover.mime,
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
     ogDescription: [e.date, e.description].filter(Boolean).join(' · '),
-  }, config.instagramUrl);
+  }, site);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);
   e.pageUrl = pageUrl;
   e.coverFile = cover.file;
 }
 
-fs.writeFileSync(path.join(DIST_DIR, 'index.html'), renderHomePage(config.siteUrl, config.instagramUrl));
-fs.writeFileSync(path.join(DIST_DIR, '404.html'), renderNotFoundPage(config.siteUrl, config.instagramUrl));
+fs.writeFileSync(path.join(DIST_DIR, 'index.html'), renderHomePage(site));
+fs.writeFileSync(path.join(DIST_DIR, '404.html'), renderNotFoundPage(site));
 fs.writeFileSync(path.join(DIST_DIR, '.nojekyll'), '');
 
 // ---------- report ----------

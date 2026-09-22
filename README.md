@@ -294,3 +294,5 @@ git add . && git commit -m "Add event" && git push   # publish
 ```
 
 Design and wording (colors, fonts, button text, footer) live in `scripts/templates.js`.
+
+**Logo:** the original is `assets/logo-source.webp`. `npm run logo` turns it into `assets/logo.png` (light bar, see-through letters) which is embedded in every page. To change the logo, replace `logo-source.*` (same style: white letters on a black bar) and run `npm run logo`, then build.
