@@ -348,8 +348,8 @@ ${commonHead(site)}
 <img src="${esc(og.imageFile)}" width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async">
 </figure>
 <section class="content" aria-labelledby="event-title">
-<div class="up">${brand(site)}</div>
-<hr class="rule up" aria-hidden="true">
+${e.brandCover ? '' : `<div class="up">${brand(site)}</div>
+<hr class="rule up" aria-hidden="true">`}
 <h1 class="title up" id="event-title">${esc(e.title)}</h1>
 <p class="date up">${dateHtml}</p>
 ${e.description ? `<p class="desc up">${esc(e.description)}</p>` : ''}

@@ -30,6 +30,7 @@ const OG_HEIGHT = 630;
 const COVER_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'attention'];
 const WHATSAPP_SAFE_BYTES = 300 * 1024;
 const MAX_HIGHLIGHTS = 8;
+let brandCoverCache; // logo cover, generated once per build
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
 
 const c = {
@@ -132,7 +133,8 @@ for (const folder of folders) {
 
   const coverName = COVER_NAMES.find((n) => fs.existsSync(path.join(dir, n)));
   if (!coverName) {
-    errors.push(`cover image is missing - put a cover.jpg in events/${folder}/`);
+    // A coming-soon event may go without a cover for now: it gets the branded logo cover.
+    if (!(event.comingSoon && sharp)) errors.push(`cover image is missing - put a cover.jpg in events/${folder}/`);
   } else {
     event.coverPath = path.join(dir, coverName);
     const coverErr = await checkCover(event.coverPath);
@@ -240,10 +242,11 @@ function copyAsset(file, name) {
   return `${config.siteUrl}/assets/${out}`;
 }
 
-// 1200x630 preview image for the home page: the logo on the dark background.
-async function buildHomeOgImage() {
+// 1200x630 image of the logo on the dark background (home page preview + default cover).
+async function brandCover() {
   const logoFile = path.join(ROOT, 'assets', 'logo.png');
   if (!sharp || !fs.existsSync(logoFile)) return null;
+  if (brandCoverCache) return brandCoverCache;
   const logoBuf = await sharp(logoFile).resize({ width: 640 }).toBuffer();
   const meta = await sharp(logoBuf).metadata();
   const lineY = Math.round(OG_HEIGHT / 2 + meta.height / 2 + 34);
@@ -252,6 +255,13 @@ async function buildHomeOgImage() {
     .composite([{ input: logoBuf, left: Math.round((OG_WIDTH - meta.width) / 2), top: Math.round((OG_HEIGHT - meta.height) / 2) }])
     .jpeg({ quality: 85, mozjpeg: true })
     .toBuffer();
+  brandCoverCache = buf;
+  return buf;
+}
+
+async function buildHomeOgImage() {
+  const buf = await brandCover();
+  if (!buf) return null;
   const file = `og-home-${crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8)}.jpg`;
   fs.writeFileSync(path.join(DIST_DIR, 'assets', file), buf);
   return { url: `${config.siteUrl}/assets/${file}`, width: OG_WIDTH, height: OG_HEIGHT };
@@ -317,6 +327,12 @@ async function checkCover(file) {
 }
 
 async function processCover(e) {
+  if (!e.coverPath) {
+    const buffer = await brandCover();
+    const hash = crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 8);
+    e.brandCover = true;
+    return { buffer, file: `cover-${hash}.jpg`, width: OG_WIDTH, height: OG_HEIGHT, mime: 'image/jpeg' };
+  }
   const source = fs.readFileSync(e.coverPath);
   // The filename hash depends only on the source image and pipeline settings, so it
   // stays the same across builds and only changes when you replace the cover.

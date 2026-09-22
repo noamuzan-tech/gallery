@@ -306,6 +306,8 @@ Create the event without a Drive link and add `"comingSoon": true`:
 }
 ```
 
+A coming-soon event may skip `cover.jpg` for now: it then gets a branded cover with your logo. Add the real cover later together with the Drive link.
+
 The page shows **"הגלריה בהכנה"** and a big **"עקבו באינסטגרם"** button (grows your followers, and nobody needs to message you). When the gallery is ready, **paste the Drive link into `driveUrl`** and push. The page switches to the normal gallery page automatically, at the same URL, so the printed QR code keeps working. (`npm run new-event` does this for you if you leave the Drive URL empty.)
 
 To collect newsletter sign-ups instead, add `"notifyUrl": "https://..."` (a sign-up form) to `site.config.json`: the main button becomes **"עדכנו אותי כשהגלריה עולה"** and Instagram moves to a secondary button.
