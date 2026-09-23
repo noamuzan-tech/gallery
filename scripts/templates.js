@@ -223,15 +223,41 @@ function waLink(site, text) {
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
 }
 
-function bookingSection(site, eventTitle, extraClass = '') {
+// Copy per audience: sport credentials on game pages, personal-event focus on other events,
+// a general version on the home page (type '').
+const BOOKING_COPY = {
+  game: {
+    title: 'רוצים צילום למשחק שלכם?',
+    lines: [
+      'עבדתי עם מועדוני כדורגל מובילים בליגת העל, והצילומים שלי פורסמו במגוון רחב של אתרים ופלטפורמות.',
+      'משחקים, טורנירים ואירועי ספורט. שלחו לי הודעה ונתאם.',
+    ],
+  },
+  event: {
+    title: 'רוצים צילום לאירוע שלכם?',
+    lines: [
+      'בר ובת מצווה, אירועים משפחתיים ואירועי חברה. צילום מקצועי ודיסקרטי, שתופס את הרגעים האמיתיים ומגיע אליכם בגלריה מסודרת, בדיוק כמו זו.',
+      'שלחו לי הודעה ונתאם.',
+    ],
+  },
+  '': {
+    title: 'רוצים צילום לאירוע שלכם?',
+    lines: [
+      'צילומי ספורט, אירועים פרטיים ואירועי חברה, עם גלריה מסודרת ומוכנה לשיתוף.',
+      'שלחו לי הודעה ונתאם.',
+    ],
+  },
+};
+
+function bookingSection(site, eventTitle, extraClass = '', type = '') {
   if (!site.whatsapp) return '';
   const text = eventTitle
-    ? `היי נועם, הגעתי מהגלריה "${eventTitle}" ואשמח לשמוע על צילום לאירוע שלנו`
+    ? `היי נועם, הגעתי מהגלריה "${eventTitle}" ואשמח לשמוע על צילום ${type === 'game' ? 'למשחק' : 'לאירוע'} שלנו`
     : 'היי נועם, אשמח לשמוע על צילום לאירוע שלנו';
+  const copy = BOOKING_COPY[type] || BOOKING_COPY.event;
   return `<section class="book${extraClass}" lang="he" dir="rtl" aria-labelledby="book-title"><div class="book-card">
-<h2 id="book-title">רוצים צילום לאירוע שלכם?</h2>
-<p>עבדתי עם מועדוני כדורגל מובילים בליגת העל, והצילומים שלי פורסמו במגוון רחב של אתרים ופלטפורמות.</p>
-<p>משחקים, אירועי ספורט ואירועים פרטיים. שלחו לי הודעה ונתאם.</p>
+<h2 id="book-title">${copy.title}</h2>
+${copy.lines.map((l) => `<p>${l}</p>`).join('\n')}
 <a class="wa" href="${esc(waLink(site, text))}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שליחת הודעה בוואטסאפ</span></a>
 </div></section>`;
 }
@@ -431,7 +457,7 @@ ${e.comingSoon ? '' : DOWNLOAD_HELP}
 ${referralBlock(e, site)}
 </section>
 </main>
-${bookingSection(site, e.title)}
+${bookingSection(site, e.title, '', e.type || 'event')}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>${SHARE_SCRIPT}${e.type === 'game' && site.referral ? REFERRAL_SCRIPT : ''}</script>
