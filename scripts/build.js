@@ -107,6 +107,7 @@ for (const folder of folders) {
     coverAlt: str('coverAlt'),
     coverPosition: str('coverPosition') || 'center',
     accentColor: str('accentColor'),
+    type: str('type'), // "game" shows the players' referral offer
     // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.
     comingSoon: data.comingSoon === true && !str('driveUrl'),
   };
@@ -122,6 +123,9 @@ for (const folder of folders) {
     if (!event.comingSoon || event.driveUrl) {
       const driveErr = validateDriveUrl(event.driveUrl);
       if (driveErr) errors.push(event.driveUrl ? driveErr : `${driveErr} (or set "comingSoon": true if the gallery is not ready yet)`);
+    }
+    if (event.type && !['game', 'event'].includes(event.type)) {
+      errors.push(`type must be "game" or "event" (got "${event.type}")`);
     }
     if (event.accentColor && !/^#[0-9a-f]{6}$/i.test(event.accentColor)) {
       errors.push(`accentColor must be a hex colour like "#f5c400" (got "${event.accentColor}")`);
@@ -163,6 +167,7 @@ const site = {
   whatsapp: config.whatsapp,
   notifyUrl: config.notifyUrl || '',
   mainSiteUrl: config.mainSite || '',
+  referral: activeReferral(config.referral),
   logo,
   logoDark,
   iconUrl: copyAsset(path.join(ROOT, 'assets', 'icon.png'), 'icon'),
@@ -226,6 +231,13 @@ if (!events.length) console.log(c.dim('  (no events yet - run "npm run new-event
 for (const w of warnings) console.warn(c.yellow(`! ${w}`));
 
 // ---------- helpers ----------
+
+// site.config.json "referral": { "until": "2026-10-31", "amount": 20 }. Returns null once the date has passed.
+function activeReferral(r) {
+  if (!r || !/^\d{4}-\d{2}-\d{2}$/.test(r.until || '')) return null;
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' }); // YYYY-MM-DD
+  return today <= r.until ? { until: r.until, amount: Number(r.amount) || 20 } : null;
+}
 
 function inlinePng(file) {
   if (!fs.existsSync(file)) return null;

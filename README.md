@@ -132,6 +132,7 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `description` | optional | Short line shown on the page and in the WhatsApp preview. |
 | `driveUrl` | ✅ | Must start with `https://`. |
 | `coverAlt` | optional | Accessibility text for the cover. Defaults to "title – date". |
+| `type` | optional | `"game"` for game shoots (shows the players' referral offer) or `"event"`. See section 15. |
 | `accentColor` | optional | Hex colour for the button, e.g. `"#f5c400"`. See section 15. |
 | `comingSoon` | optional | `true` = gallery not ready yet (no Drive link needed). See section 15. |
 | `coverPosition` | optional | How to crop a cover that isn't 1.91:1: `center` (default), `top`, `bottom`, `left`, `right`, `attention` (auto-detects the interesting area), or a **height percentage** such as `"30%"` for portrait photos (keeps the strip around 30% from the top, e.g. the player's face). |
@@ -323,6 +324,9 @@ Every build creates, per event:
 ### Highlights strip
 Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`). They're cropped to 4:5 around the interesting part, compressed, and shown as a swipeable "רגעים מהגלריה" strip under the button. Without that folder, nothing is shown. (Later, an automatic Drive picker can simply fill this folder.)
 
+### Players' referral offer (game shoots only)
+Events with `"type": "game"` show a collapsible **"הטבה לשחקנים: חבר מביא חבר"** panel with how-it-works steps and terms. The player types their name and taps **"שליחה לחבר"**; the friend receives a message with a WhatsApp link to you that already says "הגעתי בהמלצה של ...". The offer is configured in `site.config.json` → `"referral": { "until": "2026-10-31", "amount": 20 }` and disappears by itself after that date. Remove the `referral` key to turn it off; change the date/amount for a new round.
+
 ### Site-wide settings (`site.config.json`)
 
 | Key | Meaning |
@@ -331,6 +335,7 @@ Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`)
 | `instagram` | Instagram handle. Shows the Instagram icon, the tag request and the Instagram button on coming-soon pages. |
 | `whatsapp` | Phone number. Shows the "רוצים צילום לאירוע שלכם?" booking button. |
 | `mainSite` | Your main website. Linked from the home page. |
+| `referral` | Players' referral offer: `{ "until": "YYYY-MM-DD", "amount": 20 }`. |
 | `notifyUrl` | Optional newsletter sign-up form for coming-soon pages. Replaces Instagram as the main button. |
 
 ## Quick reference

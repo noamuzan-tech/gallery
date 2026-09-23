@@ -2,5 +2,9 @@
   "siteUrl": "https://gallery.noamuzan.media",
   "instagram": "noamuzan.media",
   "whatsapp": "050-9811149",
-  "mainSite": "https://www.noamuzan.media"
+  "mainSite": "https://www.noamuzan.media",
+  "referral": {
+    "until": "2026-10-31",
+    "amount": 20
+  }
 }

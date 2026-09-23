@@ -119,6 +119,20 @@ color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .help-body h3{margin:.9rem 0 .35rem;font-size:.85rem;font-weight:600;color:var(--fg)}
 .help-body ol{margin:0;padding-inline-start:1.2rem}
 .help-body li{margin:.2rem 0}
+.help-body p{margin:.6rem 0 0}
+.referral summary{gap:.6rem;justify-content:flex-start}
+.referral summary::after{margin-inline-start:auto}
+.referral summary svg{width:20px;height:20px;flex:none;color:var(--accent)}
+.referral .lead{margin-top:.2rem;color:var(--fg)}
+.ref-form{margin-top:1rem;display:flex;flex-direction:column;gap:.6rem}
+.ref-form[hidden]{display:none}
+.ref-form label{font-size:.82rem;color:var(--muted)}
+.ref-form input{font:inherit;font-size:1rem;padding:.8rem 1rem;border-radius:12px;border:1px solid rgba(244,241,234,.28);background:rgba(244,241,234,.04);color:var(--fg);width:100%}
+.ref-form input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.ref-form .cta{margin-top:.2rem;min-height:52px;font-size:1rem}
+.terms{margin-top:1rem;font-size:.78rem;color:var(--muted)}
+.terms ul{margin:.35rem 0 0;padding-inline-start:1.1rem}
+.terms li{margin:.15rem 0}
 .toast{position:fixed;inset-inline:0;bottom:calc(1.5rem + env(safe-area-inset-bottom));margin:auto;width:max-content;max-width:90vw;
 padding:.7rem 1.2rem;border-radius:999px;background:var(--fg);color:#0a0a0a;font-size:.9rem;font-weight:500;
 opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s var(--ease);pointer-events:none}
@@ -216,6 +230,7 @@ function bookingSection(site, eventTitle, extraClass = '') {
     : 'היי נועם, אשמח לשמוע על צילום לאירוע שלנו';
   return `<section class="book${extraClass}" lang="he" dir="rtl" aria-labelledby="book-title"><div class="book-card">
 <h2 id="book-title">רוצים צילום לאירוע שלכם?</h2>
+<p>עבדתי עם מועדוני כדורגל מובילים בליגת העל, והצילומים שלי פורסמו במגוון רחב של אתרים ופלטפורמות.</p>
 <p>משחקים, אירועי ספורט ואירועים פרטיים. שלחו לי הודעה ונתאם.</p>
 <a class="wa" href="${esc(waLink(site, text))}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שליחת הודעה בוואטסאפ</span></a>
 </div></section>`;
@@ -256,6 +271,61 @@ const DOWNLOAD_HELP = `<details class="help up">
 </ol>
 </div>
 </details>`;
+
+// ---------- referral offer (game shoots only) ----------
+
+const GIFT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>`;
+
+// "2026-10-31" -> "31.10.2026"
+const displayDate = (iso) => iso.split('-').reverse().join('.');
+
+// Shown on "type": "game" events while site.referral.until hasn't passed (checked at build time,
+// and again in the browser so the offer disappears on its own after the deadline).
+function referralBlock(e, site) {
+  const r = site.referral;
+  if (e.type !== 'game' || !r || !site.whatsapp) return '';
+  const until = displayDate(r.until);
+  return `<details class="help referral up" data-until="${esc(r.until)}">
+<summary>${GIFT_ICON}<span>הטבה לשחקנים: חבר מביא חבר</span></summary>
+<div class="help-body">
+<p class="lead">אהבתם את התמונות? המליצו עליי לחברים. על כל חבר שיזמין צילום משחק בזכותכם, תקבלו <strong>${r.amount} ₪ בביט</strong>, מתנה ממני.</p>
+<h3>איך זה עובד</h3>
+<ol>
+<li>כתבו את השם שלכם למטה ולחצו "שליחה לחבר".</li>
+<li>החבר מקבל הודעה עם קישור אליי בוואטסאפ, שהשם שלכם כבר כתוב בה.</li>
+<li>אחרי שהמשחק שלו צולם והתשלום הושלם, ${r.amount} ₪ עוברים אליכם בביט.</li>
+</ol>
+<form class="ref-form" id="ref-form" hidden data-phone="${esc(site.whatsapp)}">
+<label for="ref-name">השם המלא שלכם</label>
+<input id="ref-name" name="name" type="text" autocomplete="name" required placeholder="לדוגמה: יוסי כהן">
+<button class="cta" type="submit">${SHARE_ICON}<span>שליחה לחבר</span></button>
+</form>
+<div class="terms">
+<strong>תנאי ההטבה</strong>
+<ul>
+<li>בתוקף להזמנות שיתואמו עד ${until}.</li>
+<li>החבר צריך לציין את שמכם המלא בהודעה הראשונה שהוא שולח אליי. לא ניתן להוסיף ממליץ בדיעבד.</li>
+<li>ההטבה ניתנת על הזמנת צילום משחק בלבד, לאחר שהצילום בוצע והתשלום התקבל במלואו.</li>
+<li>החבר צריך להיות לקוח חדש, שלא הזמין ממני צילום בעבר.</li>
+<li>אין הגבלה על מספר החברים: כל הזמנה שעומדת בתנאים מזכה ב-${r.amount} ₪.</li>
+<li>אם כמה אנשים המליצו על אותו חבר, ההטבה תינתן למי ששמו צוין בהודעה.</li>
+<li>הזיכוי יועבר בביט תוך 7 ימים מהשלמת התשלום, ואינו ניתן להמרה או לשילוב עם הטבות אחרות.</li>
+<li>אני רשאי לעדכן את תנאי ההטבה או להפסיק אותה בכל עת.</li>
+</ul>
+</div>
+</div>
+</details>`;
+}
+
+const REFERRAL_SCRIPT = `(function(){var d=document.querySelector('.referral');if(!d)return;
+if(new Date()>new Date(d.dataset.until+'T23:59:59+03:00')){d.remove();return}
+var f=document.getElementById('ref-form');f.hidden=false;
+f.addEventListener('submit',function(ev){ev.preventDefault();var n=f.name.value.trim();if(!n)return;
+var ask='היי נועם, הגעתי בהמלצה של '+n+' ואשמח לתאם צילום משחק';
+var link='https://wa.me/'+f.dataset.phone+'?text='+encodeURIComponent(ask);
+var msg='היי! נועם עוזן צילם אותי במשחק והתמונות יצאו מעולות 📸 רוצה גם? שלח לו הודעה דרך הקישור הזה (השם שלי כבר כתוב בה): '+link;
+if(navigator.share){navigator.share({text:msg}).catch(function(){});}
+else{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');}})})();`;
 
 // ---------- event page ----------
 
@@ -358,12 +428,13 @@ ${highlightsStrip(e)}
 <button class="ghost up" id="share" type="button" hidden data-url="${esc(og.pageUrl)}" data-title="${esc(e.title)}">${SHARE_ICON}<span>שיתוף הגלריה</span></button>
 ${credit}
 ${e.comingSoon ? '' : DOWNLOAD_HELP}
+${referralBlock(e, site)}
 </section>
 </main>
 ${bookingSection(site, e.title)}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>${SHARE_SCRIPT}</script>
+<script>${SHARE_SCRIPT}${e.type === 'game' && site.referral ? REFERRAL_SCRIPT : ''}</script>
 </body>
 </html>
 `;

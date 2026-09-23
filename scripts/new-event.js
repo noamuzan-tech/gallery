@@ -34,9 +34,10 @@ const accentColor = await ask('Accent colour (optional, e.g. #f5c400): ', {
   required: false,
   validate: (v) => (/^#[0-9a-f]{6}$/i.test(v) ? null : 'Use a hex colour like #f5c400'),
 });
+const isGame = await ask('Is this a game shoot? Shows the players referral offer (y/N): ', { required: false });
 rl.close();
 
-const event = { slug, title, date, description, driveUrl };
+const event = { slug, title, date, description, driveUrl, type: /^y/i.test(isGame) ? 'game' : 'event' };
 if (!driveUrl) event.comingSoon = true;
 if (accentColor) event.accentColor = accentColor;
 
