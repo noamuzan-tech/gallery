@@ -26,7 +26,8 @@ export function readConfig() {
   let whatsapp = String(raw.whatsapp || '').replace(/\D/g, '');
   if (whatsapp.startsWith('0')) whatsapp = `972${whatsapp.slice(1)}`;
   const instagramHandle = instagramUrl ? instagramUrl.replace(/\/+$/, '').split('/').pop() : '';
-  return { ...raw, siteUrl, instagramUrl, instagramHandle, whatsapp };
+  const whatsappDisplay = String(raw.whatsapp || '').trim(); // as written in the config, e.g. "050-9811149"
+  return { ...raw, siteUrl, instagramUrl, instagramHandle, whatsapp, whatsappDisplay };
 }
 
 export function validateSlug(slug) {

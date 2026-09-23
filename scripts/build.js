@@ -165,6 +165,7 @@ const site = {
   instagramUrl: config.instagramUrl,
   instagramHandle: config.instagramHandle,
   whatsapp: config.whatsapp,
+  whatsappDisplay: config.whatsappDisplay,
   notifyUrl: config.notifyUrl || '',
   mainSiteUrl: config.mainSite || '',
   referral: activeReferral(config.referral),

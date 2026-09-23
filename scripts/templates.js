@@ -124,12 +124,7 @@ color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .referral summary::after{margin-inline-start:auto}
 .referral summary svg{width:20px;height:20px;flex:none;color:var(--accent)}
 .referral .lead{margin-top:.2rem;color:var(--fg)}
-.ref-form{margin-top:1rem;display:flex;flex-direction:column;gap:.6rem}
-.ref-form[hidden]{display:none}
-.ref-form label{font-size:.82rem;color:var(--muted)}
-.ref-form input{font:inherit;font-size:1rem;padding:.8rem 1rem;border-radius:12px;border:1px solid rgba(244,241,234,.28);background:rgba(244,241,234,.04);color:var(--fg);width:100%}
-.ref-form input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
-.ref-form .cta{margin-top:.2rem;min-height:52px;font-size:1rem}
+.help-body a{color:var(--fg);text-underline-offset:3px;unicode-bidi:isolate}
 .terms{margin-top:1rem;font-size:.78rem;color:var(--muted)}
 .terms ul{margin:.35rem 0 0;padding-inline-start:1.1rem}
 .terms li{margin:.15rem 0}
@@ -317,15 +312,10 @@ function referralBlock(e, site) {
 <p class="lead">אהבתם את התמונות? המליצו עליי לחברים. על כל חבר שיזמין צילום משחק בזכותכם, תקבלו <strong>${r.amount} ₪ בביט</strong>, מתנה ממני.</p>
 <h3>איך זה עובד</h3>
 <ol>
-<li>כתבו את השם שלכם למטה ולחצו "שליחה לחבר".</li>
-<li>החבר מקבל הודעה עם קישור אליי בוואטסאפ, שהשם שלכם כבר כתוב בה.</li>
+<li>ספרו לחברים עליי והעבירו להם את המספר שלי${site.whatsappDisplay ? `: <a href="tel:${esc(site.whatsappDisplay)}" dir="ltr">${esc(site.whatsappDisplay)}</a>` : ''}.</li>
+<li>החבר פונה אליי ומציין בהודעה הראשונה שהגיע בהמלצה שלכם, עם השם המלא שלכם.</li>
 <li>אחרי שהמשחק שלו צולם והתשלום הושלם, ${r.amount} ₪ עוברים אליכם בביט.</li>
 </ol>
-<form class="ref-form" id="ref-form" hidden data-phone="${esc(site.whatsapp)}">
-<label for="ref-name">השם המלא שלכם</label>
-<input id="ref-name" name="name" type="text" autocomplete="name" required placeholder="לדוגמה: יוסי כהן">
-<button class="cta" type="submit">${SHARE_ICON}<span>שליחה לחבר</span></button>
-</form>
 <div class="terms">
 <strong>תנאי ההטבה</strong>
 <ul>
@@ -343,15 +333,9 @@ function referralBlock(e, site) {
 </details>`;
 }
 
-const REFERRAL_SCRIPT = `(function(){var d=document.querySelector('.referral');if(!d)return;
-if(new Date()>new Date(d.dataset.until+'T23:59:59+03:00')){d.remove();return}
-var f=document.getElementById('ref-form');f.hidden=false;
-f.addEventListener('submit',function(ev){ev.preventDefault();var n=f.name.value.trim();if(!n)return;
-var ask='היי נועם, הגעתי בהמלצה של '+n+' ואשמח לתאם צילום משחק';
-var link='https://wa.me/'+f.dataset.phone+'?text='+encodeURIComponent(ask);
-var msg='היי! נועם עוזן צילם אותי במשחק והתמונות יצאו מעולות 📸 רוצה גם? שלח לו הודעה דרך הקישור הזה (השם שלי כבר כתוב בה): '+link;
-if(navigator.share){navigator.share({text:msg}).catch(function(){});}
-else{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');}})})();`;
+// Hides the offer after its deadline, even on pages that were built before it.
+const REFERRAL_SCRIPT = `(function(){var d=document.querySelector('.referral');
+if(d&&new Date()>new Date(d.dataset.until+'T23:59:59+03:00'))d.remove()})();`;
 
 // ---------- event page ----------
 
