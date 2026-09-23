@@ -453,7 +453,9 @@ ${footer(site)}
 
 // ---------- printable QR page (dist/<slug>/qr/) ----------
 
-export function renderQrPage(e, pageUrl, qrSvg, site) {
+export function renderQrPage(e, qrUrl, qrSvg, site) {
+  const scanText = e.qrTarget === 'instagram' ? 'סרקו ועקבו באינסטגרם' : 'סרקו לצפייה בגלריה';
+  const shownUrl = qrUrl.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '');
   const accent = e.accent ? ` style="--accent:${e.accent.color}"` : '';
   const logo = site.logoDark
     ? `<img class="logo" src="${site.logoDark.src}" width="${site.logoDark.width}" height="${site.logoDark.height}" alt="NOAM UZAN">`
@@ -473,7 +475,7 @@ ${site.iconUrl ? `<link rel="icon" type="image/png" href="${esc(site.iconUrl)}">
 <div>${logo}<p class="sub" lang="en" dir="ltr">PHOTOGRAPHY</p></div>
 <div><h1>${esc(e.title)}</h1><p class="date">${esc(e.date)}</p></div>
 <div class="qr" role="img" aria-label="QR code לגלריה">${qrSvg}</div>
-<div><p class="scan">סרקו לצפייה בגלריה</p><p class="url">${esc(pageUrl.replace(/^https:\/\//, ''))}</p></div>
+<div><p class="scan">${scanText}</p><p class="url">${esc(shownUrl)}</p></div>
 </article>
 <div class="tools">
 <button type="button" onclick="print()">הדפסה או שמירה כקובץ PDF</button>

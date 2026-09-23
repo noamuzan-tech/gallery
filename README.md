@@ -133,6 +133,7 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `driveUrl` | ✅ | Must start with `https://`. |
 | `coverAlt` | optional | Accessibility text for the cover. Defaults to "title – date". |
 | `type` | optional | `"game"` for game shoots (shows the players' referral offer) or `"event"`. See section 15. |
+| `qrTarget` | optional | `"instagram"` = the printed QR opens your Instagram instead of the event page. |
 | `accentColor` | optional | Hex colour for the button, e.g. `"#f5c400"`. See section 15. |
 | `comingSoon` | optional | `true` = gallery not ready yet (no Drive link needed). See section 15. |
 | `coverPosition` | optional | How to crop a cover that isn't 1.91:1: `center` (default), `top`, `bottom`, `left`, `right`, `attention` (auto-detects the interesting area), or a **height percentage** such as `"30%"` for portrait photos (keeps the strip around 30% from the top, e.g. the player's face). |
@@ -320,6 +321,8 @@ Every build creates, per event:
 - `https://gallery.noamuzan.media/<slug>/qr/`: a printable A5 card (logo, title, QR). Use "הדפסה או שמירה כקובץ PDF".
 - `.../<slug>/qr.png`: the QR alone, 1200 px
 - `.../<slug>/qr.svg`: vector, for a designer
+
+By default the QR opens the event page. Add `"qrTarget": "instagram"` to `event.json` to make the printed QR open your Instagram profile instead (the card then says "סרקו ועקבו באינסטגרם"); you send the event page link yourself when the gallery is ready.
 
 ### Highlights strip
 Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`). They're cropped to 4:5 around the interesting part, compressed, and shown as a swipeable "רגעים מהגלריה" strip under the button. Without that folder, nothing is shown. (Later, an automatic Drive picker can simply fill this folder.)

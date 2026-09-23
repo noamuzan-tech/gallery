@@ -108,6 +108,7 @@ for (const folder of folders) {
     coverPosition: str('coverPosition') || 'center',
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
+    qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
     // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.
     comingSoon: data.comingSoon === true && !str('driveUrl'),
   };
@@ -123,6 +124,11 @@ for (const folder of folders) {
     if (!event.comingSoon || event.driveUrl) {
       const driveErr = validateDriveUrl(event.driveUrl);
       if (driveErr) errors.push(event.driveUrl ? driveErr : `${driveErr} (or set "comingSoon": true if the gallery is not ready yet)`);
+    }
+    if (!['page', 'instagram'].includes(event.qrTarget)) {
+      errors.push(`qrTarget must be "page" or "instagram" (got "${event.qrTarget}")`);
+    } else if (event.qrTarget === 'instagram' && !config.instagramUrl) {
+      errors.push('qrTarget is "instagram" but site.config.json has no "instagram"');
     }
     if (event.type && !['game', 'event'].includes(event.type)) {
       errors.push(`type must be "game" or "event" (got "${event.type}")`);
@@ -195,11 +201,12 @@ for (const e of events) {
   e.highlights = await processHighlights(e, outDir, warnings);
 
   // QR code: PNG for printing, SVG for designers, and a printable card page
-  fs.writeFileSync(path.join(outDir, 'qr.png'), await QRCode.toBuffer(pageUrl, { width: 1200, margin: 2, errorCorrectionLevel: 'M' }));
-  fs.writeFileSync(path.join(outDir, 'qr.svg'), await QRCode.toString(pageUrl, { type: 'svg', margin: 2, errorCorrectionLevel: 'M' }));
-  const qrInline = await QRCode.toString(pageUrl, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0a0a0aff', light: '#ffffff00' } });
+  const qrUrl = e.qrTarget === 'instagram' ? config.instagramUrl : pageUrl;
+  fs.writeFileSync(path.join(outDir, 'qr.png'), await QRCode.toBuffer(qrUrl, { width: 1200, margin: 2, errorCorrectionLevel: 'M' }));
+  fs.writeFileSync(path.join(outDir, 'qr.svg'), await QRCode.toString(qrUrl, { type: 'svg', margin: 2, errorCorrectionLevel: 'M' }));
+  const qrInline = await QRCode.toString(qrUrl, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0a0a0aff', light: '#ffffff00' } });
   fs.mkdirSync(path.join(outDir, 'qr'), { recursive: true });
-  fs.writeFileSync(path.join(outDir, 'qr', 'index.html'), renderQrPage(e, pageUrl, qrInline, site));
+  fs.writeFileSync(path.join(outDir, 'qr', 'index.html'), renderQrPage(e, qrUrl, qrInline, site));
 
   const html = renderEventPage(e, {
     pageUrl,
