@@ -111,7 +111,7 @@ for (const folder of folders) {
     coverPosition: str('coverPosition') || 'center',
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
-    // "dmGate": true = gallery is ready but the page hides the Drive link; people DM the keyword to get it
+    // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
     dmGate: data.dmGate === true,
     dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")
     qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
@@ -226,7 +226,7 @@ for (const e of events) {
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
     ogDescription: [
       e.date,
-      e.dmGate ? `לקבלת הגלריה: שלחו "${e.dmKeyword || 'גלריה'}" באינסטגרם` : e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description,
+      e.dmGate ? `הגלריה בהכנה · לעדכון כשהיא מוכנה שלחו "${e.dmKeyword || 'גלריה'}" באינסטגרם` : e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description,
     ].filter(Boolean).join(' · '),
   }, site);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);

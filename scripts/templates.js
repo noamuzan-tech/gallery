@@ -368,17 +368,14 @@ function ctaBlock(e, site) {
   // Game pages: the main button opens an Instagram DM with Noam; players send a keyword and get the link by hand.
   // Otherwise, if site.notifyUrl is set (a newsletter sign-up form), it becomes the main button.
   if ((e.dmGate || e.type === 'game') && site.instagramHandle) {
+    // Paying clients: no "follow me" push here, just the notify-by-DM step.
     const keyword = e.dmKeyword || 'גלריה';
-    const text = e.dmGate
-      ? 'לקבלת הקישור לגלריה המלאה, שלחו הודעה באינסטגרם עם המילים:'
-      : 'רוצים לקבל את הקישור ישר להודעות כשהגלריה עולה? שלחו הודעה באינסטגרם עם המילים:';
     return `<div class="soon up">
-<span class="badge">${e.dmGate ? 'הגלריה מוכנה' : 'הגלריה בהכנה'}</span>
-<p>${text}</p>
+<span class="badge">הגלריה בהכנה</span>
+<p>רוצים לקבל הודעה כשהגלריה מוכנה? שלחו הודעה באינסטגרם עם המילים:</p>
 <span class="kw">${esc(keyword)}</span>
 <a class="cta" id="dm-cta" data-copy="${esc(keyword)}" href="https://ig.me/m/${esc(site.instagramHandle)}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שליחת הודעה באינסטגרם</span></a>
-<p class="hint">הקישור יישלח אליכם בהודעה חוזרת${e.dmGate ? '' : ' כשהגלריה עולה'}.</p>
-<a class="ghost" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer"><span class="ig-dot">${INSTAGRAM_ICON}</span><span>עקבו באינסטגרם</span></a>
+<p class="hint">הקישור לגלריה יישלח אליכם בהודעה ברגע שהיא מוכנה.</p>
 </div>`;
   }
   const notify = site.notifyUrl
