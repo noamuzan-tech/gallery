@@ -111,6 +111,8 @@ for (const folder of folders) {
     coverPosition: str('coverPosition') || 'center',
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
+    // "dmGate": true = gallery is ready but the page hides the Drive link; people DM the keyword to get it
+    dmGate: data.dmGate === true,
     dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")
     qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
     // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.
@@ -129,6 +131,7 @@ for (const folder of folders) {
       const driveErr = validateDriveUrl(event.driveUrl);
       if (driveErr) errors.push(event.driveUrl ? driveErr : `${driveErr} (or set "comingSoon": true if the gallery is not ready yet)`);
     }
+    if (event.dmGate && !config.instagramUrl) errors.push('dmGate needs "instagram" in site.config.json');
     if (!['page', 'instagram'].includes(event.qrTarget)) {
       errors.push(`qrTarget must be "page" or "instagram" (got "${event.qrTarget}")`);
     } else if (event.qrTarget === 'instagram' && !config.instagramUrl) {
@@ -221,7 +224,10 @@ for (const e of events) {
     height: cover.height,
     mime: cover.mime,
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
-    ogDescription: [e.date, e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description].filter(Boolean).join(' · '),
+    ogDescription: [
+      e.date,
+      e.dmGate ? `לקבלת הגלריה: שלחו "${e.dmKeyword || 'גלריה'}" באינסטגרם` : e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description,
+    ].filter(Boolean).join(' · '),
   }, site);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);
   e.pageUrl = pageUrl;

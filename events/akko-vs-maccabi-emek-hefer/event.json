@@ -6,5 +6,7 @@
   "driveUrl": "https://drive.google.com/drive/folders/1-7F8PmsRSbkVGRKXXiPI6eYjZ8tc6BmE?usp=sharing",
   "type": "game",
   "accentColor": "#1f4fd1",
-  "coverPosition": "30%"
+  "coverPosition": "30%",
+  "dmGate": true,
+  "dmKeyword": "גלריה עכו"
 }

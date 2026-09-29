@@ -102,6 +102,8 @@ transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
 .soon{margin-top:2rem;width:100%;max-width:420px;padding:1.6rem 1.25rem 1.4rem;border:1px solid var(--line);border-radius:22px;background:rgba(244,241,234,.03)}
 .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.35rem .95rem;border-radius:999px;font-size:.82rem;font-weight:600;
 color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.kw{display:inline-block;margin:1rem auto 0;padding:.55rem 1.2rem;border:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:12px;
+font-size:1.25rem;font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--accent) 10%,transparent);user-select:all}
 .badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.8s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .soon p{margin:1rem 0 0;font-size:.98rem;color:#d6d2ca;text-wrap:pretty}
@@ -335,6 +337,11 @@ function referralBlock(e, site) {
 </details>`;
 }
 
+// DM button: copies the keyword so it can be pasted straight into the Instagram message.
+const DM_SCRIPT = `(function(){var a=document.getElementById('dm-cta');if(!a||!navigator.clipboard)return;
+a.addEventListener('click',function(){navigator.clipboard.writeText(a.dataset.copy).then(function(){var t=document.getElementById('toast');
+t.textContent='"'+a.dataset.copy+'" הועתק. הדביקו בהודעה';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)},function(){})})})();`;
+
 // Hides the offer after its deadline, even on pages that were built before it.
 const REFERRAL_SCRIPT = `(function(){var d=document.querySelector('.referral');
 if(d&&new Date()>new Date(d.dataset.until+'T23:59:59+03:00'))d.remove()})();`;
@@ -345,13 +352,13 @@ function highlightsStrip(e) {
   if (!e.highlights?.length) return '';
   const items = e.highlights.map((h, i) => {
     const img = `<img src="${esc(h.file)}" width="${h.width}" height="${h.height}" alt="${esc(`${e.title} – תמונה ${i + 1}`)}" loading="lazy" decoding="async">`;
-    return e.comingSoon ? `<a tabindex="-1" aria-hidden="true">${img}</a>` : `<a href="${esc(e.driveUrl)}" rel="noopener noreferrer">${img}</a>`;
+    return e.comingSoon || e.dmGate ? `<a tabindex="-1" aria-hidden="true">${img}</a>` : `<a href="${esc(e.driveUrl)}" rel="noopener noreferrer">${img}</a>`;
   }).join('');
   return `<div class="strip-wrap up"><p class="strip-label">רגעים מהגלריה</p><div class="strip">${items}</div></div>`;
 }
 
 function ctaBlock(e, site) {
-  if (!e.comingSoon) {
+  if (!e.comingSoon && !e.dmGate) {
     return `<a class="cta up" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
 <span>לצפייה בגלריה המלאה</span>${ARROW}
 </a>
@@ -360,12 +367,17 @@ function ctaBlock(e, site) {
   // Coming soon: Instagram is the main call to action (grows followers, no flood of WhatsApp messages).
   // Game pages: the main button opens an Instagram DM with Noam; players send a keyword and get the link by hand.
   // Otherwise, if site.notifyUrl is set (a newsletter sign-up form), it becomes the main button.
-  if (e.type === 'game' && site.instagramHandle) {
+  if ((e.dmGate || e.type === 'game') && site.instagramHandle) {
     const keyword = e.dmKeyword || 'גלריה';
+    const text = e.dmGate
+      ? 'לקבלת הקישור לגלריה המלאה, שלחו הודעה באינסטגרם עם המילים:'
+      : 'רוצים לקבל את הקישור ישר להודעות כשהגלריה עולה? שלחו הודעה באינסטגרם עם המילים:';
     return `<div class="soon up">
-<span class="badge">הגלריה בהכנה</span>
-<p>התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה. רוצים לקבל את הקישור ישר להודעות? שלחו לי באינסטגרם את המילה <strong>"${esc(keyword)}"</strong> ואשלח לכם אותו ברגע שהגלריה עולה.</p>
-<a class="cta" href="https://ig.me/m/${esc(site.instagramHandle)}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שלחו לי הודעה באינסטגרם</span></a>
+<span class="badge">${e.dmGate ? 'הגלריה מוכנה' : 'הגלריה בהכנה'}</span>
+<p>${text}</p>
+<span class="kw">${esc(keyword)}</span>
+<a class="cta" id="dm-cta" data-copy="${esc(keyword)}" href="https://ig.me/m/${esc(site.instagramHandle)}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שליחת הודעה באינסטגרם</span></a>
+<p class="hint">הקישור יישלח אליכם בהודעה חוזרת${e.dmGate ? '' : ' כשהגלריה עולה'}.</p>
 <a class="ghost" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer"><span class="ig-dot">${INSTAGRAM_ICON}</span><span>עקבו באינסטגרם</span></a>
 </div>`;
   }
@@ -454,14 +466,14 @@ ${ctaBlock(e, site)}
 ${highlightsStrip(e)}
 <button class="ghost up" id="share" type="button" hidden data-url="${esc(og.pageUrl)}" data-title="${esc(e.title)}">${SHARE_ICON}<span>שיתוף הגלריה</span></button>
 ${credit}
-${e.comingSoon ? '' : DOWNLOAD_HELP}
+${e.comingSoon || e.dmGate ? '' : DOWNLOAD_HELP}
 ${referralBlock(e, site)}
 </section>
 </main>
 ${bookingSection(site, e.title, '', e.type || 'event')}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>${SHARE_SCRIPT}${e.type === 'game' && site.referral ? REFERRAL_SCRIPT : ''}</script>
+<script>${SHARE_SCRIPT}${DM_SCRIPT}${e.type === 'game' && site.referral ? REFERRAL_SCRIPT : ''}</script>
 </body>
 </html>
 `;

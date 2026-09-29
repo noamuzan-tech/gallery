@@ -134,6 +134,7 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `coverAlt` | optional | Accessibility text for the cover. Defaults to "title – date". |
 | `type` | optional | `"game"` for game shoots (shows the players' referral offer) or `"event"`. See section 15. |
 | `dmKeyword` | optional | Game pages in coming-soon mode: the main button opens an Instagram DM with you and asks players to send this word (default `"גלריה"`). Reply to them by hand when the gallery is up (manual replies have no 24-hour limit; DMs from non-followers land in Message Requests). |
+| `dmGate` | optional | `true` = the gallery is ready but the page hides the Drive button: people send `dmKeyword` on Instagram (the button copies it for them) and you reply with the link. Remove it to show the Drive button again. |
 | `qrTarget` | optional | `"instagram"` = the printed QR opens your Instagram instead of the event page. |
 | `accentColor` | optional | Hex colour for the button, e.g. `"#f5c400"`. See section 15. |
 | `comingSoon` | optional | `true` = gallery not ready yet (no Drive link needed). See section 15. |
