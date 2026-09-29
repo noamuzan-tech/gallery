@@ -358,7 +358,17 @@ function ctaBlock(e, site) {
 <p class="hint up">הגלריה נפתחת בגוגל דרייב</p>`;
   }
   // Coming soon: Instagram is the main call to action (grows followers, no flood of WhatsApp messages).
-  // If site.notifyUrl is set (a newsletter sign-up form), it becomes the main button and Instagram the secondary one.
+  // Game pages: the main button opens an Instagram DM with Noam; players send a keyword and get the link by hand.
+  // Otherwise, if site.notifyUrl is set (a newsletter sign-up form), it becomes the main button.
+  if (e.type === 'game' && site.instagramHandle) {
+    const keyword = e.dmKeyword || 'גלריה';
+    return `<div class="soon up">
+<span class="badge">הגלריה בהכנה</span>
+<p>התמונות יעלו לכאן בקרוב, בדיוק בקישור הזה. רוצים לקבל את הקישור ישר להודעות? שלחו לי באינסטגרם את המילה <strong>"${esc(keyword)}"</strong> ואשלח לכם אותו ברגע שהגלריה עולה.</p>
+<a class="cta" href="https://ig.me/m/${esc(site.instagramHandle)}" target="_blank" rel="noopener noreferrer">${CHAT_ICON}<span>שלחו לי הודעה באינסטגרם</span></a>
+<a class="ghost" href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer"><span class="ig-dot">${INSTAGRAM_ICON}</span><span>עקבו באינסטגרם</span></a>
+</div>`;
+  }
   const notify = site.notifyUrl
     ? `<a class="cta" href="${esc(site.notifyUrl)}" target="_blank" rel="noopener noreferrer">${BELL_ICON}<span>עדכנו אותי כשהגלריה עולה</span></a>`
     : '';

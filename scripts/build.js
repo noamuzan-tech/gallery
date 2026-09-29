@@ -111,6 +111,7 @@ for (const folder of folders) {
     coverPosition: str('coverPosition') || 'center',
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
+    dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")
     qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
     // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.
     comingSoon: data.comingSoon === true && !str('driveUrl'),
