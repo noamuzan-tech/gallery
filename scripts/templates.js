@@ -62,6 +62,7 @@ background:linear-gradient(180deg,rgba(10,10,10,.35) 0%,rgba(10,10,10,.85) 55%,v
 .page{width:100%;max-width:1040px;margin:0 auto}
 .hero{position:relative;margin:0;overflow:hidden;aspect-ratio:4/3;max-height:62vh;max-height:62svh;width:100%;
 -webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
+.hero picture{display:block;width:100%;height:100%}
 .hero img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,center);animation:reveal 1.4s var(--ease) both}
 @keyframes reveal{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
 .content{position:relative;margin-top:-.75rem;padding:0 1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center}
@@ -389,6 +390,12 @@ export function renderEventPage(e, og, site) {
   const iso = isoDate(e.date);
   const dateHtml = iso ? `<time datetime="${iso}">${esc(e.date)}</time>` : esc(e.date);
   const alt = e.coverAlt || `${e.title} – ${e.date}`;
+  // Sharp page images: a 4:3 crop for phones, a 2x wide version for bigger / high-density screens
+  const hv = e.heroVariants || {};
+  const mobileSource = hv.mobile ? `<source media="(max-width:599px)" srcset="${esc(hv.mobile.file)}" width="${hv.mobile.width}" height="${hv.mobile.height}">` : '';
+  const wideSrcset = hv.wide
+    ? ` srcset="${esc(og.imageFile)} ${og.width}w, ${esc(hv.wide.file)} ${hv.wide.width}w" sizes="(min-width:768px) 976px, 100vw"`
+    : '';
   const accentStyle = e.accent ? ` style="--accent:${e.accent.color};--on-accent:${e.accent.on}"` : '';
   const credit = site.instagramHandle && !e.comingSoon
     ? `<p class="credit up">מעלים לאינסטגרם? אשמח לתיוג <a href="${esc(site.instagramUrl)}" target="_blank" rel="noopener noreferrer">@${esc(site.instagramHandle)}</a></p>`
@@ -419,14 +426,13 @@ export function renderEventPage(e, og, site) {
 <meta name="twitter:image" content="${esc(og.imageUrl)}">
 <link rel="canonical" href="${esc(og.pageUrl)}">
 ${commonHead(site)}
-<link rel="preload" as="image" href="${esc(og.imageFile)}" fetchpriority="high">
 <style>${BASE_CSS}${EVENT_CSS}</style>
 </head>
 <body${accentStyle}>
-<img class="ambient" src="${esc(og.imageFile)}" alt="" aria-hidden="true" decoding="async">
+<picture>${mobileSource}<img class="ambient" src="${esc(og.imageFile)}" alt="" aria-hidden="true" decoding="async"></picture>
 <main class="page">
 <figure class="hero"${og.focus ? ` style="--pos:${og.focus}"` : ''}>
-<img src="${esc(og.imageFile)}" width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async">
+<picture>${mobileSource}<img src="${esc(og.imageFile)}"${wideSrcset} width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async"></picture>
 </figure>
 <section class="content" aria-labelledby="event-title">
 ${e.brandCover ? '' : `<div class="up">${brand(site)}</div>

@@ -24,11 +24,14 @@ import { renderEventPage, renderHomePage, renderNotFoundPage, renderQrPage } fro
 
 // Bump this if the image pipeline below changes, so every cover gets a new filename
 // (and WhatsApp is forced to fetch it again).
-const PIPELINE_VERSION = '1';
+const PIPELINE_VERSION = '2';
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 const COVER_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'attention'];
 const WHATSAPP_SAFE_BYTES = 300 * 1024;
+// Sharper versions for the page itself (the 1200x630 cover stays the WhatsApp image)
+const HERO_WIDE = { width: 2400, height: 1260, quality: 80 }; // desktop / high-density screens
+const HERO_MOBILE = { width: 1600, height: 1200, quality: 80 }; // phones: 4:3 crop
 const MAX_HIGHLIGHTS = 8;
 let brandCoverCache; // logo cover, generated once per build
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
@@ -188,6 +191,7 @@ for (const e of events) {
 
   const cover = await processCover(e);
   fs.writeFileSync(path.join(outDir, cover.file), cover.buffer);
+  for (const v of Object.values(e.heroVariants || {})) fs.writeFileSync(path.join(outDir, v.file), v.buffer);
   if (cover.buffer.length > WHATSAPP_SAFE_BYTES) {
     warnings.push(`${e.slug}: cover is ${Math.round(cover.buffer.length / 1024)} KB. WhatsApp may skip images over ~300 KB.`);
   }
@@ -363,31 +367,19 @@ async function processCover(e) {
     .slice(0, 8);
 
   if (sharp) {
-    const focusY = parsePercent(e.coverPosition);
-    if (focusY != null) {
-      // Vertical focus point for tall (portrait) covers: "30%" keeps the band around 30% from the top.
-      const { data, info } = await sharp(source).rotate().resize({ width: OG_WIDTH }).toBuffer({ resolveWithObject: true });
-      if (info.height > OG_HEIGHT) {
-        const top = Math.round(Math.min(Math.max(focusY * info.height - OG_HEIGHT / 2, 0), info.height - OG_HEIGHT));
-        const crop = (quality) => sharp(data)
-          .extract({ left: 0, top, width: OG_WIDTH, height: OG_HEIGHT })
-          .jpeg({ quality, mozjpeg: true, progressive: true })
-          .toBuffer();
-        let buffer = await crop(82);
-        if (buffer.length > WHATSAPP_SAFE_BYTES) buffer = await crop(70);
-        return { buffer, file: `cover-${hash}.jpg`, width: OG_WIDTH, height: OG_HEIGHT, mime: 'image/jpeg' };
-      }
+    // WhatsApp image: as sharp as possible while staying under ~300 KB
+    let buffer;
+    for (const quality of [88, 80, 70]) {
+      buffer = await cropJpeg(source, OG_WIDTH, OG_HEIGHT, e.coverPosition, quality);
+      if (buffer.length <= WHATSAPP_SAFE_BYTES) break;
     }
-    const pipeline = (quality) => sharp(source)
-      .rotate() // respect EXIF orientation
-      .resize(OG_WIDTH, OG_HEIGHT, {
-        fit: 'cover',
-        position: parsePercent(e.coverPosition) != null ? 'center' : e.coverPosition === 'attention' ? sharp.strategy.attention : e.coverPosition,
-      })
-      .jpeg({ quality, mozjpeg: true, progressive: true })
-      .toBuffer();
-    let buffer = await pipeline(82);
-    if (buffer.length > WHATSAPP_SAFE_BYTES) buffer = await pipeline(70);
+    // Higher-resolution crops for the page, only when the source is big enough
+    const { width: srcWidth } = await sharp(source).rotate().metadata().then((m) => (m.orientation >= 5 ? { width: m.height } : m));
+    e.heroVariants = {};
+    for (const [key, v] of Object.entries({ wide: HERO_WIDE, mobile: HERO_MOBILE })) {
+      if (srcWidth < v.width * 0.75) continue;
+      e.heroVariants[key] = { buffer: await cropJpeg(source, v.width, v.height, e.coverPosition, v.quality), file: `hero-${key}-${hash}.jpg`, width: v.width, height: v.height };
+    }
     return { buffer, file: `cover-${hash}.jpg`, width: OG_WIDTH, height: OG_HEIGHT, mime: 'image/jpeg' };
   }
 
@@ -406,6 +398,28 @@ async function processCover(e) {
 function parsePercent(value) {
   const m = /^(\d{1,3})%$/.exec(value);
   return m && Number(m[1]) <= 100 ? Number(m[1]) / 100 : null;
+}
+
+// Crops the source to width x height. coverPosition is a named position ("center", "top", "attention"...)
+// or a vertical focus percentage ("30%") for portrait photos.
+async function cropJpeg(source, width, height, position, quality) {
+  const jpeg = { quality, mozjpeg: true, progressive: true };
+  const focusY = parsePercent(position);
+  if (focusY != null) {
+    const { data, info } = await sharp(source).rotate().resize({ width }).toBuffer({ resolveWithObject: true });
+    if (info.height > height) {
+      const top = Math.round(Math.min(Math.max(focusY * info.height - height / 2, 0), info.height - height));
+      return sharp(data).extract({ left: 0, top, width, height }).jpeg(jpeg).toBuffer();
+    }
+  }
+  return sharp(source)
+    .rotate() // respect EXIF orientation
+    .resize(width, height, {
+      fit: 'cover',
+      position: focusY != null ? 'center' : position === 'attention' ? sharp.strategy.attention : position,
+    })
+    .jpeg(jpeg)
+    .toBuffer();
 }
 
 // Minimal JPEG/PNG dimension reader, used only when sharp is unavailable.
