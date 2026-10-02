@@ -30,8 +30,8 @@ const OG_HEIGHT = 630;
 const COVER_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'attention'];
 const WHATSAPP_SAFE_BYTES = 300 * 1024;
 // Sharper versions for the page itself (the 1200x630 cover stays the WhatsApp image)
-const HERO_WIDE = { width: 2400, height: 1260, quality: 80 }; // desktop / high-density screens
-const HERO_MOBILE = { width: 1600, height: 1200, quality: 80 }; // phones: 4:3 crop
+const HERO_WIDE = { width: 2400, height: 1260, quality: 86 }; // desktop / high-density screens
+const HERO_MOBILE = { width: 1600, height: 1200, quality: 86 }; // phones: 4:3 crop
 const MAX_HIGHLIGHTS = 8;
 let brandCoverCache; // logo cover, generated once per build
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
@@ -113,6 +113,7 @@ for (const folder of folders) {
     type: str('type'), // "game" shows the players' referral offer
     // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
     dmGate: data.dmGate === true,
+    noReferral: data.referral === false, // "referral": false hides the players' referral offer on this game page
     dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")
     qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
     // "comingSoon": true + no driveUrl yet = page shows "coming soon" + notify sign-up. Adding the Drive link switches it on.

@@ -307,7 +307,7 @@ const displayDate = (iso) => iso.split('-').reverse().join('.');
 // and again in the browser so the offer disappears on its own after the deadline).
 function referralBlock(e, site) {
   const r = site.referral;
-  if (e.type !== 'game' || !r || !site.whatsapp) return '';
+  if (e.type !== 'game' || e.noReferral || !r || !site.whatsapp) return '';
   const until = displayDate(r.until);
   return `<details class="help referral up" data-until="${esc(r.until)}">
 <summary>${GIFT_ICON}<span>הטבה לשחקנים: חבר מביא חבר</span></summary>
@@ -470,7 +470,7 @@ ${referralBlock(e, site)}
 ${bookingSection(site, e.title, '', e.type || 'event')}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>${SHARE_SCRIPT}${DM_SCRIPT}${e.type === 'game' && site.referral ? REFERRAL_SCRIPT : ''}</script>
+<script>${SHARE_SCRIPT}${DM_SCRIPT}${e.type === 'game' && !e.noReferral && site.referral ? REFERRAL_SCRIPT : ''}</script>
 </body>
 </html>
 `;
