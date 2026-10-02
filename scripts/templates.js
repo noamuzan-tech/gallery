@@ -62,6 +62,7 @@ background:linear-gradient(180deg,rgba(10,10,10,.35) 0%,rgba(10,10,10,.85) 55%,v
 .page{width:100%;max-width:1040px;margin:0 auto}
 .hero{position:relative;margin:0;overflow:hidden;aspect-ratio:4/3;max-height:62vh;max-height:62svh;width:100%;
 -webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
+.hero.tall{aspect-ratio:1/1;-webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);mask-image:linear-gradient(180deg,#000 82%,transparent 100%)}
 .hero picture{display:block;width:100%;height:100%}
 .hero img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,center);animation:reveal 1.4s var(--ease) both}
 @keyframes reveal{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
@@ -143,10 +144,10 @@ opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s var(--
 .content>.up:nth-child(6){animation-delay:.75s}
 .content>.up:nth-child(7){animation-delay:.85s}
 .content>.up:nth-child(n+8){animation-delay:.95s}
-@media (min-width:600px) and (max-width:767px){.hero{aspect-ratio:16/9}}
+@media (min-width:600px) and (max-width:767px){.hero,.hero.tall{aspect-ratio:16/9}}
 @media (min-width:768px){
 .page{padding:3rem 2rem 0}
-.hero{aspect-ratio:1200/630;max-height:none;width:min(100%,calc(52vh * 1.905));margin:0 auto;border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.8);-webkit-mask-image:none;mask-image:none}
+.hero,.hero.tall{aspect-ratio:1200/630;max-height:none;width:min(100%,calc(52vh * 1.905));margin:0 auto;border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.8);-webkit-mask-image:none;mask-image:none}
 .content{margin-top:2.5rem}
 .strip{justify-content:center}
 }
@@ -450,7 +451,7 @@ ${commonHead(site)}
 <body${accentStyle}>
 <picture>${mobileSource}<img class="ambient" src="${esc(og.imageFile)}" alt="" aria-hidden="true" decoding="async"></picture>
 <main class="page">
-<figure class="hero"${og.focus ? ` style="--pos:${og.focus}"` : ''}>
+<figure class="hero${hv.mobile ? ' tall' : ''}"${og.focus ? ` style="--pos:${og.focus}"` : ''}>
 <picture>${mobileSource}<img src="${esc(og.imageFile)}"${wideSrcset} width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async"></picture>
 </figure>
 <section class="content" aria-labelledby="event-title">

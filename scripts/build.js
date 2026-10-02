@@ -31,7 +31,7 @@ const COVER_POSITIONS = ['center', 'top', 'bottom', 'left', 'right', 'attention'
 const WHATSAPP_SAFE_BYTES = 300 * 1024;
 // Sharper versions for the page itself (the 1200x630 cover stays the WhatsApp image)
 const HERO_WIDE = { width: 2400, height: 1260, quality: 86 }; // desktop / high-density screens
-const HERO_MOBILE = { width: 1600, height: 1200, quality: 86 }; // phones: 4:3 crop
+const HERO_MOBILE = { width: 1600, height: 1600, quality: 86 }; // phones: square crop
 const MAX_HIGHLIGHTS = 8;
 let brandCoverCache; // logo cover, generated once per build
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
