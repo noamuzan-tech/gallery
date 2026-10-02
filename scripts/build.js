@@ -109,6 +109,7 @@ for (const folder of folders) {
     driveUrl: str('driveUrl'),
     coverAlt: str('coverAlt'),
     coverPosition: str('coverPosition') || 'center',
+    coverPositionMobile: str('coverPositionMobile'), // optional separate crop focus for the phone (4:3) image
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
     // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
@@ -144,7 +145,11 @@ for (const folder of folders) {
     if (event.accentColor && !/^#[0-9a-f]{6}$/i.test(event.accentColor)) {
       errors.push(`accentColor must be a hex colour like "#f5c400" (got "${event.accentColor}")`);
     }
-    if (!COVER_POSITIONS.includes(event.coverPosition) && !parsePercent(event.coverPosition)) {
+    const badPos = (p) => !COVER_POSITIONS.includes(p) && !parsePercent(p);
+    if (event.coverPositionMobile && badPos(event.coverPositionMobile)) {
+      errors.push('coverPositionMobile must be like coverPosition (e.g. "46%" or "top")');
+    }
+    if (badPos(event.coverPosition)) {
       errors.push(`coverPosition must be one of: ${COVER_POSITIONS.join(', ')}, or a height percentage like "30%"`);
     }
   }
@@ -370,7 +375,7 @@ async function processCover(e) {
   // stays the same across builds and only changes when you replace the cover.
   const hash = crypto.createHash('sha256')
     .update(source)
-    .update(`|v${PIPELINE_VERSION}|${sharp ? 'sharp' : 'raw'}|${e.coverPosition}`)
+    .update(`|v${PIPELINE_VERSION}|${sharp ? 'sharp' : 'raw'}|${e.coverPosition}${e.coverPositionMobile ? `|${e.coverPositionMobile}` : ''}`)
     .digest('hex')
     .slice(0, 8);
 
@@ -386,7 +391,7 @@ async function processCover(e) {
     e.heroVariants = {};
     for (const [key, v] of Object.entries({ wide: HERO_WIDE, mobile: HERO_MOBILE })) {
       if (srcWidth < v.width * 0.75) continue;
-      e.heroVariants[key] = { buffer: await cropJpeg(source, v.width, v.height, e.coverPosition, v.quality), file: `hero-${key}-${hash}.jpg`, width: v.width, height: v.height };
+      e.heroVariants[key] = { buffer: await cropJpeg(source, v.width, v.height, (key === 'mobile' && e.coverPositionMobile) || e.coverPosition, v.quality), file: `hero-${key}-${hash}.jpg`, width: v.width, height: v.height };
     }
     return { buffer, file: `cover-${hash}.jpg`, width: OG_WIDTH, height: OG_HEIGHT, mime: 'image/jpeg' };
   }

@@ -1,11 +1,12 @@
 {
   "slug": "twizer-academy",
   "title": "משחק ההשקה של TWIZER ACADEMY",
-  "date": "28.09.2026",
+  "date": "30.09.2026",
   "description": "בית הספר לכדורגל נגד הפועל חיפה",
   "driveUrl": "https://drive.google.com/drive/folders/1RUDEvL2XV19u1FLKzz5-iEOIcppl59-N?usp=sharing",
   "type": "game",
   "referral": false,
   "accentColor": "#6cb8e8",
-  "coverPosition": "37%"
+  "coverPosition": "42%",
+  "coverPositionMobile": "46%"
 }
