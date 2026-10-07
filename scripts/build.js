@@ -114,6 +114,7 @@ for (const folder of folders) {
     type: str('type'), // "game" shows the players' referral offer
     // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
     dmGate: data.dmGate === true,
+    uploading: data.uploading === true, // gallery open, photos still being uploaded (shows a note above the button)
     noReferral: data.referral === false, // "referral": false hides the players' referral offer on this game page
     dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")
     qrTarget: str('qrTarget') || 'page', // "instagram" = the printed QR opens the Instagram profile instead of this page
@@ -232,7 +233,7 @@ for (const e of events) {
     focus: { top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[e.coverPosition],
     ogDescription: [
       e.date,
-      e.dmGate ? `הגלריה בהכנה · לעדכון כשהיא מוכנה שלחו "${e.dmKeyword || 'גלריה'}" באינסטגרם` : e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.description,
+      e.dmGate ? `הגלריה בהכנה · לעדכון כשהיא מוכנה שלחו "${e.dmKeyword || 'גלריה'}" באינסטגרם` : e.comingSoon ? 'הגלריה בהכנה ותעלה בקרוב' : e.uploading ? 'התמונות בהעלאה · אפשר כבר לצפות בגלריה' : e.description,
     ].filter(Boolean).join(' · '),
   }, site);
   fs.writeFileSync(path.join(outDir, 'index.html'), html);

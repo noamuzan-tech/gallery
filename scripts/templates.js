@@ -103,6 +103,8 @@ transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
 .soon{margin-top:2rem;width:100%;max-width:420px;padding:1.6rem 1.25rem 1.4rem;border:1px solid var(--line);border-radius:22px;background:rgba(244,241,234,.03)}
 .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.35rem .95rem;border-radius:999px;font-size:.82rem;font-weight:600;
 color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.uploading{margin:2rem 0 0;display:flex;flex-direction:column;align-items:center;gap:.6rem;font-size:.9rem;color:#d6d2ca;max-width:34ch}
+.uploading + .cta{margin-top:1.25rem}
 .kw{display:inline-block;margin:1rem auto 0;padding:.55rem 1.2rem;border:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:12px;
 font-size:1.25rem;font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--accent) 10%,transparent);user-select:all}
 .badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.8s ease-in-out infinite}
@@ -360,8 +362,12 @@ function highlightsStrip(e) {
 
 function ctaBlock(e, site) {
   if (!e.comingSoon && !e.dmGate) {
-    return `<a class="cta up" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
-<span>לצפייה בגלריה המלאה</span>${ARROW}
+    // "uploading": the gallery is open but photos are still being added
+    const uploading = e.uploading
+      ? `<p class="uploading up"><span class="badge">התמונות עדיין בהעלאה</span><span>אפשר כבר להיכנס לגלריה. תמונות נוספות יתווספו אליה בקרוב.</span></p>`
+      : '';
+    return `${uploading}<a class="cta up" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
+<span>${e.uploading ? 'לצפייה בגלריה' : 'לצפייה בגלריה המלאה'}</span>${ARROW}
 </a>
 <p class="hint up">הגלריה נפתחת בגוגל דרייב</p>`;
   }
