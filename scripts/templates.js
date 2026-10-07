@@ -103,6 +103,9 @@ transition:background-color .25s,border-color .25s,transform .25s var(--ease)}
 .soon{margin-top:2rem;width:100%;max-width:420px;padding:1.6rem 1.25rem 1.4rem;border:1px solid var(--line);border-radius:22px;background:rgba(244,241,234,.03)}
 .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.35rem .95rem;border-radius:999px;font-size:.82rem;font-weight:600;
 color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.avail{margin:1rem 0 0;display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border-radius:12px;font-size:.85rem;color:#d6d2ca;
+background:rgba(244,241,234,.04);border:1px solid var(--line);max-width:420px;text-align:start}
+.avail svg{width:18px;height:18px;flex:none;color:var(--accent)}
 .uploading{margin:2rem 0 0;display:flex;flex-direction:column;align-items:center;gap:.6rem;font-size:.9rem;color:#d6d2ca;max-width:34ch}
 .uploading + .cta{margin-top:1.25rem}
 .kw{display:inline-block;margin:1rem auto 0;padding:.55rem 1.2rem;border:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:12px;
@@ -211,6 +214,7 @@ const INSTAGRAM_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>`;
 const CHAT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>`;
 const BELL_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`;
+const CLOCK_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
 const ARROW = `<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>`;
 
 function footer({ instagramUrl }) {
@@ -369,7 +373,8 @@ function ctaBlock(e, site) {
     return `${uploading}<a class="cta up" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
 <span>${e.uploading ? 'לצפייה בגלריה' : 'לצפייה בגלריה המלאה'}</span>${ARROW}
 </a>
-<p class="hint up">הגלריה נפתחת בגוגל דרייב</p>`;
+<p class="hint up">הגלריה נפתחת בגוגל דרייב</p>${e.downloadDays ? `
+<p class="avail up">${CLOCK_ICON}<span>התמונות זמינות להורדה למשך ${e.downloadDays} יום. מומלץ לשמור את התמונות שאהבתם.</span></p>` : ''}`;
   }
   // Coming soon: Instagram is the main call to action (grows followers, no flood of WhatsApp messages).
   // Game pages: the main button opens an Instagram DM with Noam; players send a keyword and get the link by hand.

@@ -8,5 +8,6 @@
   "uploading": true,
   "accentColor": "#2563d9",
   "coverPosition": "40%",
-  "coverPositionMobile": "47%"
+  "coverPositionMobile": "47%",
+  "downloadDays": 14
 }
