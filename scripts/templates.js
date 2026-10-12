@@ -345,6 +345,12 @@ function referralBlock(e, site) {
 }
 
 // DM button: copies the keyword so it can be pasted straight into the Instagram message.
+// Android: open Drive links straight in the Google Drive app (with the browser as fallback),
+// like a Drive link sent directly in WhatsApp. iPhone keeps the normal link (Safari hands it to the app).
+const DRIVE_APP_SCRIPT = `(function(){if(!/Android/i.test(navigator.userAgent))return;
+document.querySelectorAll('a.drive-link').forEach(function(a){var u=a.href;if(!/^https:\\/\\/drive\\.google\\.com\\//.test(u))return;
+a.href='intent://'+u.replace(/^https:\\/\\//,'')+'#Intent;scheme=https;package=com.google.android.apps.docs;S.browser_fallback_url='+encodeURIComponent(u)+';end'})})();`;
+
 const DM_SCRIPT = `(function(){var a=document.getElementById('dm-cta');if(!a||!navigator.clipboard)return;
 a.addEventListener('click',function(){navigator.clipboard.writeText(a.dataset.copy).then(function(){var t=document.getElementById('toast');
 t.textContent='"'+a.dataset.copy+'" הועתק. הדביקו בהודעה';t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)},function(){})})})();`;
@@ -370,7 +376,7 @@ function ctaBlock(e, site) {
     const uploading = e.uploading
       ? `<p class="uploading up"><span class="badge">התמונות עדיין בהעלאה</span><span>אפשר כבר להיכנס לגלריה. תמונות נוספות יתווספו אליה בקרוב.</span></p>`
       : '';
-    return `${uploading}<a class="cta up" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
+    return `${uploading}<a class="cta up drive-link" href="${esc(e.driveUrl)}" rel="noopener noreferrer">
 <span>${e.uploading ? 'לצפייה בגלריה' : 'לצפייה בגלריה המלאה'}</span>${ARROW}
 </a>
 <p class="hint up">הגלריה נפתחת בגוגל דרייב</p>${e.downloadDays ? `
@@ -482,7 +488,7 @@ ${referralBlock(e, site)}
 ${bookingSection(site, e.title, '', e.type || 'event')}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>${SHARE_SCRIPT}${DM_SCRIPT}${e.type === 'game' && !e.noReferral && site.referral ? REFERRAL_SCRIPT : ''}</script>
+<script>${SHARE_SCRIPT}${DM_SCRIPT}${DRIVE_APP_SCRIPT}${e.type === 'game' && !e.noReferral && site.referral ? REFERRAL_SCRIPT : ''}</script>
 </body>
 </html>
 `;
