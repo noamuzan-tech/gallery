@@ -336,6 +336,9 @@ Put up to 8 photos in `events/<slug>/highlights/` (any names, `.jpg/.png/.webp`)
 ### Players' referral offer (game shoots only)
 Events with `"type": "game"` show a collapsible **"הטבה לשחקנים: חבר מביא חבר"** panel with how-it-works steps, your phone number and the terms. Players recommend you in their own words; the friend mentions who referred him in his first message. The offer is configured in `site.config.json` → `"referral": { "until": "2026-10-31", "amount": 20 }` and disappears by itself after that date. Remove the `referral` key to turn it off; change the date/amount for a new round.
 
+### "Featured on & worked with" logos
+Every page shows a scrolling strip of logos in white circles. The logos live in `assets/logos/` and their order and names in `assets/logos/logos.json`. To add a logo: put the PNG (transparent background works best) in that folder and add a line to `logos.json`. To remove one, delete its line.
+
 ### Site-wide settings (`site.config.json`)
 
 | Key | Meaning |

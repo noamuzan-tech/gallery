@@ -194,6 +194,7 @@ const site = {
   logoDark,
   iconUrl: copyAsset(path.join(ROOT, 'assets', 'icon.png'), 'icon'),
   homeOg: await buildHomeOgImage(),
+  partnerLogos: await buildPartnerLogos(),
 };
 
 const warnings = [];
@@ -296,6 +297,28 @@ async function brandCover() {
     .toBuffer();
   brandCoverCache = buf;
   return buf;
+}
+
+// assets/logos/logos.json + PNGs -> small square WebP logos for the "featured on & worked with" strip.
+async function buildPartnerLogos() {
+  const dir = path.join(ROOT, 'assets', 'logos');
+  const listFile = path.join(dir, 'logos.json');
+  if (!sharp || !fs.existsSync(listFile)) return [];
+  const out = [];
+  fs.mkdirSync(path.join(DIST_DIR, 'assets', 'logos'), { recursive: true });
+  for (const { file, name } of JSON.parse(fs.readFileSync(listFile, 'utf8'))) {
+    const src = path.join(dir, file);
+    if (!fs.existsSync(src)) { console.warn(c.yellow(`! assets/logos/${file} not found, skipped`)); continue; }
+    const trimmed = await sharp(src).trim().toBuffer();
+    const buf = await sharp(trimmed)
+      .resize(160, 160, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .webp({ quality: 90, alphaQuality: 100 })
+      .toBuffer();
+    const outName = `${path.parse(file).name}-${crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8)}.webp`;
+    fs.writeFileSync(path.join(DIST_DIR, 'assets', 'logos', outName), buf);
+    out.push({ url: `${config.siteUrl}/assets/logos/${outName}`, name });
+  }
+  return out;
 }
 
 async function buildHomeOgImage() {

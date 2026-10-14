@@ -200,6 +200,32 @@ display:flex;flex-direction:column;align-items:center;justify-content:space-betw
 @media print{body{background:#fff;padding:0}.tools{display:none}.card{box-shadow:none;border-radius:0;width:148mm;height:210mm;aspect-ratio:auto}@page{size:A5;margin:0}}
 `;
 
+// "Featured on & worked with": logos in white circles scrolling in an endless loop.
+// The list is rendered twice and the track moves by exactly half its width, so the loop is seamless.
+const PARTNERS_CSS = `
+.partners{margin:3.5rem 0 0;text-align:center}
+.partners h2{margin:0 0 1.3rem;font:500 .7rem/1.4 "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.42em;margin-right:-.42em;color:var(--muted)}
+.marquee{direction:ltr;overflow:hidden;
+-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marquee-track{display:flex;width:max-content;padding:.6rem 0 1rem;animation:marquee 22s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.logo-dot{flex:none;width:84px;height:84px;margin-right:16px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+box-shadow:0 10px 24px -12px rgba(0,0,0,.7)}
+.logo-dot img{width:66%;height:66%;object-fit:contain}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (min-width:768px){.logo-dot{width:104px;height:104px;margin-right:20px}.partners{max-width:1040px;margin-inline:auto}}
+@media (prefers-reduced-motion:reduce){.marquee{overflow-x:auto}}
+`;
+
+function partnersSection(site) {
+  if (!site.partnerLogos?.length) return '';
+  const dots = (hidden) => site.partnerLogos.map((l) => `<span class="logo-dot"${hidden ? ' aria-hidden="true"' : ''}><img src="${esc(l.url)}" width="160" height="160" alt="${hidden ? '' : esc(l.name)}" loading="lazy" decoding="async"></span>`).join('');
+  return `<section class="partners" aria-labelledby="partners-title">
+<h2 id="partners-title" lang="en" dir="ltr">FEATURED ON &amp; WORKED WITH</h2>
+<div class="marquee"><div class="marquee-track">${dots(false)}${dots(true)}</div></div>
+</section>`;
+}
+
 // ---------- shared pieces ----------
 
 // site.logo is a data: URI of assets/logo.png (inlined, so no extra request). Falls back to text.
@@ -463,7 +489,7 @@ export function renderEventPage(e, og, site) {
 <meta name="twitter:image" content="${esc(og.imageUrl)}">
 <link rel="canonical" href="${esc(og.pageUrl)}">
 ${commonHead(site)}
-<style>${BASE_CSS}${EVENT_CSS}</style>
+<style>${BASE_CSS}${EVENT_CSS}${PARTNERS_CSS}</style>
 </head>
 <body${accentStyle}>
 <picture>${mobileSource}<img class="ambient" src="${esc(og.imageFile)}" alt="" aria-hidden="true" decoding="async"></picture>
@@ -485,6 +511,7 @@ ${e.comingSoon || e.dmGate ? '' : DOWNLOAD_HELP}
 ${referralBlock(e, site)}
 </section>
 </main>
+${partnersSection(site)}
 ${bookingSection(site, e.title, '', e.type || 'event')}
 ${footer(site)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -558,7 +585,7 @@ export function renderHomePage(site) {
 ${og}
 <link rel="canonical" href="${esc(siteUrl)}/">
 ${commonHead(site)}
-<style>${BASE_CSS}${HOME_CSS}</style>
+<style>${BASE_CSS}${HOME_CSS}${PARTNERS_CSS}</style>
 </head>
 <body>
 <main class="home">
@@ -568,6 +595,7 @@ ${commonHead(site)}
 <p class="msg up">Received a gallery link? Open it directly from your message.</p>
 ${mainSite}
 </main>
+${partnersSection(site)}
 ${bookingSection(site, '', ' up')}
 ${footer(site)}
 </body>
