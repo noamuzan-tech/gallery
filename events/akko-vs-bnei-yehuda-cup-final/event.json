@@ -9,5 +9,6 @@
   "accentColor": "#1f4fd1",
   "coverPosition": "24%",
   "coverPositionMobile": "36%",
-  "referral": false
+  "referral": false,
+  "uploading": true
 }
