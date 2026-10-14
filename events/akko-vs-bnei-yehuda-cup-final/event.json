@@ -7,15 +7,15 @@
   "type": "game",
   "downloadDays": 14,
   "accentColor": "#1f4fd1",
-  "coverPosition": "24%",
-  "coverPositionMobile": "36%",
+  "coverPosition": "30%",
+  "coverPositionMobile": "48%",
   "referral": false,
   "uploading": true,
   "extraCovers": [
     {
       "file": "cover-2.jpg",
-      "position": "30%",
-      "positionMobile": "48%"
+      "position": "24%",
+      "positionMobile": "36%"
     }
   ]
 }

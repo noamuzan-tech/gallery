@@ -447,7 +447,7 @@ ${ig}
 
 // Extra cover photos fade in over the cover one after another (about 6 s each), in a loop.
 // Pure CSS; with reduced motion only the first photo is shown.
-const SLIDE_SECONDS = 6;
+const SLIDE_SECONDS = 4;
 function slidesMarkup(e) {
   if (!e.slides?.length) return '';
   const total = (e.slides.length + 1) * SLIDE_SECONDS;
