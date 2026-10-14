@@ -110,6 +110,8 @@ for (const folder of folders) {
     coverAlt: str('coverAlt'),
     coverPosition: str('coverPosition') || 'center',
     coverPositionMobile: str('coverPositionMobile'), // optional separate crop focus for the phone (4:3) image
+    // more photos that take turns with the cover at the top of the page: [{ "file": "cover-2.jpg", "position": "30%", "positionMobile": "45%" }]
+    extraCovers: Array.isArray(data.extraCovers) ? data.extraCovers : [],
     accentColor: str('accentColor'),
     type: str('type'), // "game" shows the players' referral offer
     // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
@@ -205,6 +207,7 @@ for (const e of events) {
   const cover = await processCover(e);
   fs.writeFileSync(path.join(outDir, cover.file), cover.buffer);
   for (const v of Object.values(e.heroVariants || {})) fs.writeFileSync(path.join(outDir, v.file), v.buffer);
+  e.slides = await processExtraCovers(e, outDir);
   if (cover.buffer.length > WHATSAPP_SAFE_BYTES) {
     warnings.push(`${e.slug}: cover is ${Math.round(cover.buffer.length / 1024)} KB. WhatsApp may skip images over ~300 KB.`);
   }
@@ -436,6 +439,33 @@ async function processCover(e) {
 function parsePercent(value) {
   const m = /^(\d{1,3})%$/.exec(value);
   return m && Number(m[1]) <= 100 ? Number(m[1]) / 100 : null;
+}
+
+// Extra page photos (event.json "extraCovers"): same three crops as the cover, shown as a slideshow.
+async function processExtraCovers(e, outDir) {
+  if (!sharp || !e.extraCovers.length) return [];
+  const slides = [];
+  for (const x of e.extraCovers) {
+    const src = path.join(EVENTS_DIR, e.folder, x.file || '');
+    if (!x.file || !fs.existsSync(src)) { console.warn(c.yellow(`! ${e.slug}: extra cover "${x.file}" not found, skipped`)); continue; }
+    const source = fs.readFileSync(src);
+    const pos = x.position || e.coverPosition;
+    const posMobile = x.positionMobile || pos;
+    const hash = crypto.createHash('sha256').update(source).update(`|v${PIPELINE_VERSION}|${pos}|${posMobile}`).digest('hex').slice(0, 8);
+    const crops = {
+      base: { width: OG_WIDTH, height: OG_HEIGHT, quality: 86, pos },
+      wide: { ...HERO_WIDE, pos },
+      mobile: { ...HERO_MOBILE, pos: posMobile },
+    };
+    const slide = {};
+    for (const [key, v] of Object.entries(crops)) {
+      const file = `slide-${key}-${hash}.jpg`;
+      fs.writeFileSync(path.join(outDir, file), await cropJpeg(source, v.width, v.height, v.pos, v.quality));
+      slide[key] = { file, width: v.width, height: v.height };
+    }
+    slides.push(slide);
+  }
+  return slides;
 }
 
 // Crops the source to width x height. coverPosition is a named position ("center", "top", "attention"...)

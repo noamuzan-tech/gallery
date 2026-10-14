@@ -64,6 +64,7 @@ background:linear-gradient(180deg,rgba(10,10,10,.35) 0%,rgba(10,10,10,.85) 55%,v
 -webkit-mask-image:linear-gradient(180deg,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,#000 70%,transparent 100%)}
 .hero.tall{aspect-ratio:1/1;-webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);mask-image:linear-gradient(180deg,#000 82%,transparent 100%)}
 .hero picture{display:block;width:100%;height:100%}
+.hero .slide{position:absolute;inset:0;opacity:0}
 .hero img{width:100%;height:100%;object-fit:cover;object-position:var(--pos,center);animation:reveal 1.4s var(--ease) both}
 @keyframes reveal{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
 .content{position:relative;margin-top:-.75rem;padding:0 1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center}
@@ -444,6 +445,20 @@ ${ig}
 </div>`;
 }
 
+// Extra cover photos fade in over the cover one after another (about 6 s each), in a loop.
+// Pure CSS; with reduced motion only the first photo is shown.
+const SLIDE_SECONDS = 6;
+function slidesMarkup(e) {
+  if (!e.slides?.length) return '';
+  const total = (e.slides.length + 1) * SLIDE_SECONDS;
+  const pct = (sec) => +(sec / total * 100).toFixed(2);
+  const keyframes = `@keyframes slide-cycle{0%{opacity:0}${pct(1)}%{opacity:1}${pct(SLIDE_SECONDS)}%{opacity:1}${pct(SLIDE_SECONDS + 1)}%{opacity:0}100%{opacity:0}}`;
+  const items = e.slides.map((s, i) => `<picture class="slide" aria-hidden="true" style="animation:slide-cycle ${total}s linear ${(i + 1) * SLIDE_SECONDS - 1}s infinite">`
+    + `<source media="(max-width:599px)" srcset="${esc(s.mobile.file)}" width="${s.mobile.width}" height="${s.mobile.height}">`
+    + `<img src="${esc(s.base.file)}" srcset="${esc(s.base.file)} ${s.base.width}w, ${esc(s.wide.file)} ${s.wide.width}w" sizes="(min-width:768px) 976px, 100vw" width="${s.base.width}" height="${s.base.height}" alt="" loading="lazy" decoding="async"></picture>`).join('');
+  return `<style>${keyframes}</style>${items}`;
+}
+
 /**
  * Event landing page.
  * e: { slug, title, date, description, driveUrl, coverAlt, comingSoon, highlights, accent }
@@ -496,6 +511,7 @@ ${commonHead(site)}
 <main class="page">
 <figure class="hero${hv.mobile ? ' tall' : ''}"${og.focus ? ` style="--pos:${og.focus}"` : ''}>
 <picture>${mobileSource}<img src="${esc(og.imageFile)}"${wideSrcset} width="${og.width}" height="${og.height}" alt="${esc(alt)}" fetchpriority="high" decoding="async"></picture>
+${slidesMarkup(e)}
 </figure>
 <section class="content" aria-labelledby="event-title">
 ${e.brandCover ? '' : `<div class="up">${brand(site)}</div>

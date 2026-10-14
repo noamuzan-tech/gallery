@@ -137,6 +137,7 @@ and creates `events/beitar-maccabi/event.json`. Then **put your cover image at `
 | `coverPositionMobile` | optional | Separate crop focus for the phone (4:3) image, same format as `coverPosition`. Useful when the WhatsApp crop and the phone crop need different points. |
 | `downloadDays` | optional | e.g. `14` shows "התמונות זמינות להורדה למשך 14 יום" under the gallery button. |
 | `uploading` | optional | `true` = the gallery is open but photos are still being added: a "התמונות עדיין בהעלאה" note shows above the button. Remove it when the upload is done. |
+| `extraCovers` | optional | More photos that take turns with the cover at the top of the page (soft fade, ~6 s each). Put the files in the event folder, e.g. `[{ "file": "cover-2.jpg", "position": "30%", "positionMobile": "48%" }]`. The WhatsApp preview always uses `cover.jpg`. |
 | `referral` | optional | `false` hides the players' referral offer on this game page. |
 | `dmGate` | optional | `true` = the page hides the Drive button and shows "הגלריה בהכנה": people send `dmKeyword` on Instagram (the button copies it) and you message them the link when the gallery is ready. Remove it to show the Drive button. |
 | `qrTarget` | optional | `"instagram"` = the printed QR opens your Instagram instead of the event page. |

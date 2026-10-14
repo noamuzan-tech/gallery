@@ -10,5 +10,12 @@
   "coverPosition": "24%",
   "coverPositionMobile": "36%",
   "referral": false,
-  "uploading": true
+  "uploading": true,
+  "extraCovers": [
+    {
+      "file": "cover-2.jpg",
+      "position": "30%",
+      "positionMobile": "48%"
+    }
+  ]
 }
