@@ -117,6 +117,7 @@ for (const folder of folders) {
     // "dmGate": true = the page hides the Drive link and shows "coming soon"; people DM the keyword and get notified
     dmGate: data.dmGate === true,
     downloadDays: Number(data.downloadDays) || 0, // "downloadDays": 14 shows "available for download for 14 days"
+    usageNotice: data.usageNotice === true, // personal-use notice under the gallery button
     uploading: data.uploading === true, // gallery open, photos still being uploaded (shows a note above the button)
     noReferral: data.referral === false, // "referral": false hides the players' referral offer on this game page
     dmKeyword: str('dmKeyword'), // word players DM on Instagram while a game gallery is coming soon (default "גלריה")

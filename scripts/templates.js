@@ -107,6 +107,7 @@ color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .avail{margin:1rem 0 0;display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1rem;border-radius:12px;font-size:.85rem;color:#d6d2ca;
 background:rgba(244,241,234,.04);border:1px solid var(--line);max-width:420px;text-align:start}
 .avail svg{width:18px;height:18px;flex:none;color:var(--accent)}
+.usage{margin:.8rem 0 0;max-width:38ch;font-size:.78rem;line-height:1.55;color:var(--muted)}
 .uploading{margin:2rem 0 0;display:flex;flex-direction:column;align-items:center;gap:.6rem;font-size:.9rem;color:#d6d2ca;max-width:34ch}
 .uploading + .cta{margin-top:1.25rem}
 .kw{display:inline-block;margin:1rem auto 0;padding:.55rem 1.2rem;border:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:12px;
@@ -407,7 +408,8 @@ function ctaBlock(e, site) {
 <span>${e.uploading ? 'לצפייה בגלריה' : 'לצפייה בגלריה המלאה'}</span>${ARROW}
 </a>
 <p class="hint up">הגלריה נפתחת בגוגל דרייב</p>${e.downloadDays ? `
-<p class="avail up">${CLOCK_ICON}<span>התמונות זמינות להורדה למשך ${e.downloadDays} יום. מומלץ לשמור את התמונות שאהבתם.</span></p>` : ''}`;
+<p class="avail up">${CLOCK_ICON}<span>התמונות זמינות להורדה למשך ${e.downloadDays} יום. מומלץ לשמור את התמונות שאהבתם.</span></p>` : ''}${e.usageNotice ? `
+<p class="usage up">התמונות מיועדות לשימוש אישי של המזמינים בלבד (${e.type === 'game' ? 'שחקני הקבוצה והצוות' : 'משתתפי האירוע'}). גורמים אחרים: יש לפנות לצלם לפני כל שימוש.</p>` : ''}`;
   }
   // Coming soon: Instagram is the main call to action (grows followers, no flood of WhatsApp messages).
   // Game pages: the main button opens an Instagram DM with Noam; players send a keyword and get the link by hand.

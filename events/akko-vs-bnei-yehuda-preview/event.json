@@ -1,0 +1,21 @@
+{
+  "slug": "akko-vs-bnei-yehuda-preview",
+  "title": "הפועל עכו נגד בני יהודה",
+  "date": "13.10.2026",
+  "description": "גמר גביע הטוטו · מהחימום ועד שריקת הסיום",
+  "driveUrl": "https://drive.google.com/drive/folders/1k48yEzS-uCKZCxb4M46_mbAwTm34XpM-?usp=sharing",
+  "type": "game",
+  "downloadDays": 14,
+  "accentColor": "#1f4fd1",
+  "coverPosition": "30%",
+  "coverPositionMobile": "48%",
+  "referral": false,
+  "extraCovers": [
+    {
+      "file": "cover-2.jpg",
+      "position": "24%",
+      "positionMobile": "36%"
+    }
+  ],
+  "usageNotice": true
+}
