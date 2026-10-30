@@ -1,0 +1,15 @@
+{
+  "slug": "karmiel-vs-golan",
+  "title": "עירוני כרמיאל נגד גולן",
+  "date": "30.10.2026",
+  "description": "ילדים ב׳ · מהחימום ועד שריקת הסיום",
+  "driveUrl": "https://drive.google.com/drive/folders/1L6TdhN4jZXAuMl0MBUZTqS5cBOzH84Zo?usp=sharing",
+  "type": "game",
+  "downloadDays": 14,
+  "accentColor": "#2563d9",
+  "coverPosition": "45%",
+  "extraCovers": [
+    { "file": "cover-2.jpg", "position": "30%", "positionMobile": "45%" },
+    { "file": "cover-3.jpg", "position": "40%", "positionMobile": "50%" }
+  ]
+}
