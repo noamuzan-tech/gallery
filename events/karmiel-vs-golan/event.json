@@ -9,7 +9,16 @@
   "accentColor": "#2563d9",
   "coverPosition": "45%",
   "extraCovers": [
-    { "file": "cover-2.jpg", "position": "30%", "positionMobile": "45%" },
-    { "file": "cover-3.jpg", "position": "40%", "positionMobile": "50%" }
-  ]
+    {
+      "file": "cover-2.jpg",
+      "position": "30%",
+      "positionMobile": "45%"
+    },
+    {
+      "file": "cover-3.jpg",
+      "position": "40%",
+      "positionMobile": "50%"
+    }
+  ],
+  "uploading": true
 }
