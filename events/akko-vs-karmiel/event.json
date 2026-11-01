@@ -1,0 +1,18 @@
+{
+  "slug": "akko-vs-karmiel",
+  "title": "הפועל עכו נגד עירוני כרמיאל",
+  "date": "01.11.2026",
+  "description": "נערים א׳ · מהחימום ועד השריקה",
+  "comingSoon": true,
+  "type": "game",
+  "accentColor": "#1f4fd1",
+  "coverPosition": "30%",
+  "coverPositionMobile": "45%",
+  "extraCovers": [
+    { "file": "cover-2.jpg", "position": "33%", "positionMobile": "30%" },
+    { "file": "cover-3.jpg", "position": "35%", "positionMobile": "35%" },
+    { "file": "cover-4.jpg", "position": "50%", "positionMobile": "60%" }
+  ],
+  "dmKeyword": "גלריה עכו",
+  "referral": false
+}
